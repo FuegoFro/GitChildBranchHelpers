@@ -8,6 +8,7 @@ import git_helpers
 from git_helpers import git, get_current_branch, hash_for
 from git_make_child_branch import make_child_branch
 from git_rebase_children import rebase_children
+from print_child_branch_structure import print_branch_structure
 
 
 @contextlib.contextmanager
@@ -132,6 +133,8 @@ def main(target_directory, config_file):
         current_commit = hash_for("HEAD")
         rebase_children()
         assert current_commit == hash_for("HEAD")
+
+        print_branch_structure()
 
 
 if __name__ == '__main__':

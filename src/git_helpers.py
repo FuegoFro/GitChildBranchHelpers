@@ -83,6 +83,12 @@ class BranchTracker(object):
     def bases_for_branch(self, branch):
         return self._branch_to_bases[branch]
 
+    def get_all_parents(self):
+        return self._parent_to_children.keys()
+
+    def has_parent(self, branch):
+        return branch in self._child_to_parent
+
     def collapse_and_remove_parent(self, old_parent):
         # Remove the old parent from its parent, use that as the new parent
         new_parent = self._child_to_parent.pop(old_parent)
