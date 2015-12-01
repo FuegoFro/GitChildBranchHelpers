@@ -1,5 +1,5 @@
 import argparse
-from git_helpers import get_current_branch, get_branch_tracker, arc, base_branch_name, git
+from git_helpers import get_current_branch, get_branch_tracker, arc
 
 
 def main():
