@@ -12,12 +12,18 @@ def get_current_branch():
     return git("rev-parse --abbrev-ref HEAD").strip()
 
 
-def get_config_file():
-    return os.path.expanduser("~/.git_child_helper_branches")
-
-
 def get_branch_tracker():
-    return BranchTrackerWrapper(get_config_file())
+    git_dir = git("rev-parse --git-dir").strip()
+    config_dir = os.path.join(git_dir, "child_branch_helper")
+    if os.path.exists(config_dir):
+        assert os.path.isdir(config_dir)
+    else:
+        os.mkdir(config_dir)
+    config_file = os.path.join(config_dir, "branches.csv")
+    # Make sure the config file exists
+    if not os.path.exists(config_file):
+        open(config_file, "a").close()
+    return BranchTrackerWrapper(config_file)
 
 
 def arc(command):
@@ -28,9 +34,6 @@ class BranchTrackerWrapper(object):
     def __init__(self, config_file):
         super(BranchTrackerWrapper, self).__init__()
         self.config_file = config_file
-        # Make sure the config file exists
-        if not os.path.exists(config_file):
-            open(config_file, "a").close()
 
     def __enter__(self):
         self.branch_tracker = BranchTracker(self.config_file)

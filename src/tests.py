@@ -3,7 +3,6 @@ import contextlib
 import os
 import shutil
 import subprocess
-import git_helpers
 
 from git_helpers import git, get_current_branch, hash_for
 from git_make_child_branch import make_child_branch
@@ -12,30 +11,24 @@ from print_child_branch_structure import print_branch_structure
 
 
 @contextlib.contextmanager
-def run_test(path, config_file):
+def run_test(path):
     starting_directory = os.getcwd()
     try:
         os.chdir(path)
-        git_helpers.get_config_file = lambda: config_file
         yield
     finally:
         os.chdir(starting_directory)
         shutil.rmtree(path)
-        os.remove(config_file)
 
 
-def main(target_directory, config_file):
+def main(target_directory):
     target_directory = os.path.expanduser(target_directory)
     target_container = os.path.dirname(target_directory)
     assert not os.path.exists(target_directory)
     assert os.path.isdir(target_container)
-    config_file = os.path.expanduser(config_file)
-    config_file_container = os.path.dirname(config_file)
-    assert not os.path.exists(config_file)
-    assert os.path.isdir(config_file_container)
 
     os.mkdir(target_directory)
-    with run_test(target_directory, config_file):
+    with run_test(target_directory):
         # Initialize a repo and add a first commit so we can tell what branch we're on.
         print "Initializing repo"
         git("init")
@@ -140,6 +133,5 @@ def main(target_directory, config_file):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("test_target_dir")
-    parser.add_argument("test_config_file")
     args = parser.parse_args()
-    main(args.test_target_dir, args.test_config_file)
+    main(args.test_target_dir)
