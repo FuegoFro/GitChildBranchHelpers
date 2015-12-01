@@ -3,34 +3,38 @@ import contextlib
 import os
 import shutil
 import subprocess
-from git_helpers import git, get_current_branch
+import git_helpers
+
+from git_helpers import git, get_current_branch, hash_for
 from git_make_child_branch import make_child_branch
 from git_rebase_children import rebase_children
 
 
 @contextlib.contextmanager
-def run_test(path):
+def run_test(path, config_file):
     starting_directory = os.getcwd()
     try:
         os.chdir(path)
+        git_helpers.get_config_file = lambda: config_file
         yield
     finally:
         os.chdir(starting_directory)
         shutil.rmtree(path)
+        os.remove(config_file)
 
 
-def hash_for(rev):
-    return git("rev-parse --verify %s" % rev)
-
-
-def main(target_directory):
+def main(target_directory, config_file):
     target_directory = os.path.expanduser(target_directory)
     target_container = os.path.dirname(target_directory)
     assert not os.path.exists(target_directory)
-    assert os.path.exists(target_container)
+    assert os.path.isdir(target_container)
+    config_file = os.path.expanduser(config_file)
+    config_file_container = os.path.dirname(config_file)
+    assert not os.path.exists(config_file)
+    assert os.path.isdir(config_file_container)
 
     os.mkdir(target_directory)
-    with run_test(target_directory):
+    with run_test(target_directory, config_file):
         # Initialize a repo and add a first commit so we can tell what branch we're on.
         print "Initializing repo"
         git("init")
@@ -133,5 +137,6 @@ def main(target_directory):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("test_target_dir")
+    parser.add_argument("test_config_file")
     args = parser.parse_args()
-    main(args.test_target_dir)
+    main(args.test_target_dir, args.test_config_file)

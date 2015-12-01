@@ -1,19 +1,16 @@
 import argparse
 
-from git_helpers import get_current_branch, git, base_branch_name
+from git_helpers import get_current_branch, git, get_branch_tracker, hash_for
 
 
 def make_child_branch(new_branch_name):
     current_branch = get_current_branch()
-
-    # Make the base branch where the current branch is.
-    # If we're on master, no need for a base branch.
-    if current_branch != "master":
-        base_branch = base_branch_name(current_branch, new_branch_name)
-        git("branch %s %s" % (base_branch, current_branch))
-
-    # Make the new branch, also where the current branch is
-    git("checkout -b %s" % new_branch_name)
+    current_rev = hash_for(current_branch)
+    with get_branch_tracker() as tracker:
+        # Add the child using the current branch as the parent.
+        tracker.add_child_for_parent(current_branch, new_branch_name, current_rev)
+        # Make the new branch, also where the current branch is
+        git("checkout -b %s" % new_branch_name)
 
 
 if __name__ == '__main__':

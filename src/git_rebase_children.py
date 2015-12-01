@@ -1,40 +1,55 @@
 import argparse
 
-from git_helpers import git, get_current_branch, base_branch_name, get_branch_mappings
+from git_helpers import git, get_current_branch, get_branch_tracker, hash_for
 
 
-def do_rebase(parent, child):
-    if parent is None:
-        base_branch = None
-        parent = "master"
-        rebase_start = "master"
+def does_branch_contain_commit(branch, commit):
+    return git("branch --contains %s" % commit).find(" %s\n" % branch) >= 0
+
+
+def do_rebase(tracker, parent, child):
+    bases = tracker.bases_for_branch(child)
+
+    if len(bases) == 2:
+        first_base, second_base = bases
+        has_first_base = does_branch_contain_commit(child, first_base)
+        has_second_base = does_branch_contain_commit(child, second_base)
+        # Should have at least one of the two bases
+        assert has_first_base or has_second_base
+        if has_first_base and has_second_base:
+            # Choose the newer one. The older one will be the merge base of the two
+            older_base = git("merge-base %s %s" % (first_base, second_base))
+            first_is_newer = older_base == second_base
+            base = first_base if first_is_newer else second_base
+        else:
+            # Only has one, choose the one that it does have
+            base = bases[0] if has_first_base else bases[1]
+        tracker.finish_rebase(child, base)
     else:
-        base_branch = base_branch_name(parent, child)
-        rebase_start = base_branch
+        base = bases[0]
 
-    git("rebase --onto %s %s %s" % (parent, rebase_start, child))
-    # Move our base branch to be where the parent is now
-    if base_branch is not None:
-        git("branch -D %s" % base_branch)
-        git("branch %s %s" % (base_branch, parent))
+    parent_rev = hash_for(parent)
+
+    tracker.start_rebase(child, parent_rev)
+    git("rebase --onto %s %s %s" % (parent, base, child))
+    tracker.finish_rebase(child, parent_rev)
 
 
 def rebase_children():
     current_branch = get_current_branch()
-    parent_to_children, child_to_parent = get_branch_mappings()
+    with get_branch_tracker() as tracker:
+        do_rebase(tracker, tracker.parent_for_child(current_branch), current_branch)
 
-    do_rebase(child_to_parent.get(current_branch), current_branch)
+        to_rebase_onto = [current_branch]
+        while to_rebase_onto:
+            parent = to_rebase_onto.pop()
+            children = tracker.children_for_parent(parent)
+            for child in children:
+                do_rebase(tracker, parent, child)
+                to_rebase_onto.append(child)
 
-    to_rebase_onto = [current_branch]
-    while to_rebase_onto:
-        parent = to_rebase_onto.pop()
-        children = parent_to_children[parent]
-        for child in children:
-            do_rebase(parent, child)
-            to_rebase_onto.append(child)
-
-    # Go back to where we started.
-    git("checkout %s" % current_branch)
+        # Go back to where we started.
+        git("checkout %s" % current_branch)
 
 
 if __name__ == '__main__':
