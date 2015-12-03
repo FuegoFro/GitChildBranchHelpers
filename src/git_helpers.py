@@ -2,6 +2,7 @@ from collections import defaultdict
 import csv
 import os
 import subprocess
+import shutil
 
 
 def git(command):
@@ -66,7 +67,8 @@ class BranchTracker(object):
                     self._branch_to_bases[child] = (base, )
 
     def save_to_file(self):
-        with open(self._config_file, "w") as f:
+        tmp_config_file = self._config_file + ".tmp"
+        with open(tmp_config_file, "w") as f:
             writer = csv.writer(f)
             for child, parent in self._child_to_parent.items():
                 bases = self._branch_to_bases[child]
@@ -76,6 +78,7 @@ class BranchTracker(object):
                 else:
                     base, rebase_base = bases
                 writer.writerow([child, parent, base, rebase_base])
+        shutil.move(tmp_config_file, self._config_file)
 
     def parent_for_child(self, child):
         return self._child_to_parent[child]
@@ -120,6 +123,19 @@ class BranchTracker(object):
         bases = self._branch_to_bases[branch]
         assert len(bases) == 2
         self._branch_to_bases[branch] = (new_base, )
+
+    def rename_branch(self, old_branch, new_branch):
+        self._branch_to_bases[new_branch] = self._branch_to_bases.pop(old_branch)
+
+        if old_branch in self._child_to_parent:
+            parent = self._child_to_parent[new_branch] = self._child_to_parent.pop(old_branch)
+            self._parent_to_children[parent].remove(old_branch)
+            self._parent_to_children[parent].append(new_branch)
+
+        if old_branch in self._parent_to_children:
+            children = self._parent_to_children[new_branch] = self._parent_to_children.pop(old_branch)
+            for child in children:
+                self._child_to_parent[child] = new_branch
 
 
 def hash_for(rev):
