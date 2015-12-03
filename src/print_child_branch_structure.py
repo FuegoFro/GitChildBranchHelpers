@@ -8,7 +8,11 @@ def print_branch_structure():
             if not tracker.has_parent(parent):
                 roots.append(parent)
 
+    first = True
     for root in roots:
+        if not first:
+            print ""
+        first = False
         print root
         print_tree(tracker, root, "")
 

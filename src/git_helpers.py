@@ -104,10 +104,11 @@ class BranchTracker(object):
         self._branch_to_bases.pop(old_parent)
 
         # Update the old parent's children to point to the new parent
-        children = self._parent_to_children.pop(old_parent)
-        self._parent_to_children[new_parent].extend(children)
-        for child in children:
-            self._child_to_parent[child] = new_parent
+        if old_parent in self._parent_to_children:
+            children = self._parent_to_children.pop(old_parent)
+            self._parent_to_children[new_parent].extend(children)
+            for child in children:
+                self._child_to_parent[child] = new_parent
 
     def add_child_for_parent(self, parent, new_child, child_base):
         self._child_to_parent[new_child] = parent
