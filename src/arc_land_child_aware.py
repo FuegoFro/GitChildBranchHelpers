@@ -1,17 +1,12 @@
 import argparse
-from git_helpers import get_current_branch, get_branch_tracker, arc
-from git_rebase_children import does_branch_contain_commit
+from git_helpers import get_current_branch, get_branch_tracker, arc, fail_if_not_rebased
 
 
 def main():
     current_branch = get_current_branch()
     with get_branch_tracker() as tracker:
         parent = tracker.parent_for_child(current_branch)
-        bases = tracker.bases_for_branch(current_branch)
-        assert len(bases) in (1, 2)
-        if len(bases) == 2 or not does_branch_contain_commit(parent, bases[0]):
-            print "Please rebase this branch on top of its parent"
-            exit()
+        fail_if_not_rebased(current_branch, parent, tracker)
 
         if parent != "master":
             should_land = raw_input("Are you sure you want to land onto non-master branch '%s'? [y/N] " % parent)

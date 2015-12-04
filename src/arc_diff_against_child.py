@@ -1,6 +1,6 @@
 import sys
 
-from git_helpers import get_current_branch, arc
+from git_helpers import get_current_branch, arc, fail_if_not_rebased
 from git_rebase_children import get_branch_tracker
 
 
@@ -13,6 +13,7 @@ def main(extra_arc_diff_options):
     current_branch = get_current_branch()
     with get_branch_tracker() as tracker:
         parent = tracker.parent_for_child(current_branch)
+        fail_if_not_rebased(current_branch, parent, tracker)
         arc("diff %s%s" % (parent, extra_args))
 
 if __name__ == '__main__':

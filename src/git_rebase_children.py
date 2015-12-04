@@ -1,10 +1,6 @@
 import argparse
 
-from git_helpers import git, get_current_branch, get_branch_tracker, hash_for
-
-
-def does_branch_contain_commit(branch, commit):
-    return git("branch --contains %s" % commit).find(" %s\n" % branch) >= 0
+from git_helpers import git, get_current_branch, get_branch_tracker, hash_for, does_branch_contain_commit
 
 
 def do_rebase(tracker, parent, child):

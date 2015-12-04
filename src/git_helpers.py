@@ -27,6 +27,18 @@ def get_branch_tracker():
     return BranchTrackerWrapper(config_file)
 
 
+def does_branch_contain_commit(branch, commit):
+    return git("branch --contains %s" % commit).find(" %s\n" % branch) >= 0
+
+
+def fail_if_not_rebased(current_branch, parent, tracker):
+    bases = tracker.bases_for_branch(current_branch)
+    assert len(bases) in (1, 2)
+    if len(bases) == 2 or not does_branch_contain_commit(parent, bases[0]):
+        print "Please rebase this branch on top of its parent"
+        exit()
+
+
 def arc(command):
         subprocess.check_call(["arc"] + command.split(" "))
 
