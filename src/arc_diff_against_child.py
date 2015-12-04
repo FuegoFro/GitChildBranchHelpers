@@ -17,5 +17,5 @@ def main(extra_arc_diff_options):
         arc("diff %s%s" % (parent, extra_args))
 
 if __name__ == '__main__':
-    extra_arc_diff_options = sys.argv[1:]
-    main(extra_arc_diff_options)
+    args = sys.argv[1:]
+    main(args)
