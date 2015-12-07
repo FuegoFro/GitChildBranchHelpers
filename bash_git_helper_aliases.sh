@@ -13,3 +13,5 @@ alias cal='python "$GIT_CHILD_BRANCH_HELPERS_LOCATION"/arc_land_child_aware.py'
 alias cps='python "$GIT_CHILD_BRANCH_HELPERS_LOCATION"/print_child_branch_structure.py'
 # Rename
 alias crn='python "$GIT_CHILD_BRANCH_HELPERS_LOCATION"/git_rename_branch.py'
+# Remove leaf child
+alias crm='python "$GIT_CHILD_BRANCH_HELPERS_LOCATION"/git_remove_leaf_child.py'

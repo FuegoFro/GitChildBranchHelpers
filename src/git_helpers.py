@@ -150,6 +150,14 @@ class BranchTracker(object):
             for child in children:
                 self._child_to_parent[child] = new_branch
 
+    def remove_child_leaf(self, child_leaf):
+        children = self._parent_to_children[child_leaf]
+        assert not children, "Expected branch to be a leaf node, had %s child(ren)." % len(children)
+
+        if child_leaf in self._child_to_parent:
+            parent = self._child_to_parent.pop(child_leaf)
+            self._parent_to_children[parent].remove(child_leaf)
+
 
 def hash_for(rev):
     return git("rev-parse --verify %s" % rev).strip()
