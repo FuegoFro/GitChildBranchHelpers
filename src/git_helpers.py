@@ -6,10 +6,7 @@ import shutil
 
 
 def git(command):
-    try:
-        return subprocess.check_output(["git"] + command.split(" "))
-    except subprocess.CalledProcessError:
-        handle_expected_command_failure("git", command)
+    return run_command_expecting_failure(subprocess.check_output, "git", command)
 
 
 def get_current_branch():
@@ -43,19 +40,25 @@ def fail_if_not_rebased(current_branch, parent, tracker):
 
 
 def arc(command):
+    run_command_expecting_failure(subprocess.check_call, "arc", command)
+
+
+def run_command_expecting_failure(command_runner, program, command):
     try:
-        subprocess.check_call(["arc"] + command.split(" "))
+        return command_runner([program] + command.split(" "))
     except subprocess.CalledProcessError:
-        handle_expected_command_failure("arc", command)
-
-
-def handle_expected_command_failure(program, command):
-    print ""
-    print "!!!!!!!!"
-    print "!!! Failed to run/finish %s command:" % program
-    print "!!! `%s %s`" % (program, command)
-    print "!!!!!!!!"
-    exit(1)
+        print ""
+        print "!!!!!!!!"
+        print "!!! Failed to run/finish %s command:" % program
+        print "!!! `%s %s`" % (program, command)
+        print "!!!!!!!!"
+        print ""
+        exit(1)
+    except KeyboardInterrupt:
+        print ""
+        print "User aborted command: `%s %s`" % (program, command)
+        print ""
+        exit(1)
 
 
 class BranchTrackerWrapper(object):
