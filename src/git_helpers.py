@@ -173,6 +173,14 @@ class BranchTracker(object):
             parent = self._child_to_parent.pop(child_leaf)
             self._parent_to_children[parent].remove(child_leaf)
 
+    def set_parent(self, child, new_parent):
+        if child in self._child_to_parent:
+            old_parent = self._child_to_parent[child]
+            self._parent_to_children[old_parent].remove(child)
+
+        self._child_to_parent[child] = new_parent
+        self._parent_to_children[new_parent].append(child)
+
 
 def hash_for(rev):
     return git("rev-parse --verify %s" % rev).strip()

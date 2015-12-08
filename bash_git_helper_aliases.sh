@@ -15,3 +15,5 @@ alias cps='python "$GIT_CHILD_BRANCH_HELPERS_LOCATION"/print_child_branch_struct
 alias crn='python "$GIT_CHILD_BRANCH_HELPERS_LOCATION"/git_rename_branch.py'
 # Remove leaf child
 alias crm='python "$GIT_CHILD_BRANCH_HELPERS_LOCATION"/git_remove_leaf_child.py'
+# Change parent
+alias ccp='python "$GIT_CHILD_BRANCH_HELPERS_LOCATION"/git_change_parent.py'
