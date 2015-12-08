@@ -31,18 +31,19 @@ def do_rebase(tracker, parent, child):
     tracker.finish_rebase(child, parent_rev)
 
 
-def rebase_children():
+def rebase_children(is_recursive):
     current_branch = get_current_branch()
     with get_branch_tracker() as tracker:
         do_rebase(tracker, tracker.parent_for_child(current_branch), current_branch)
 
-        to_rebase_onto = [current_branch]
-        while to_rebase_onto:
-            parent = to_rebase_onto.pop()
-            children = tracker.children_for_parent(parent)
-            for child in children:
-                do_rebase(tracker, parent, child)
-                to_rebase_onto.append(child)
+        if is_recursive:
+            to_rebase_onto = [current_branch]
+            while to_rebase_onto:
+                parent = to_rebase_onto.pop()
+                children = tracker.children_for_parent(parent)
+                for child in children:
+                    do_rebase(tracker, parent, child)
+                    to_rebase_onto.append(child)
 
         # Go back to where we started.
         git("checkout %s" % current_branch)
@@ -50,5 +51,7 @@ def rebase_children():
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
+    parser.add_argument("-r", "--recursive", action="store_true",
+                        help="If set, will recursively rebase all sub-branches")
     args = parser.parse_args()
-    rebase_children()
+    rebase_children(args.recursive)
