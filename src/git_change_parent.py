@@ -6,6 +6,7 @@ def main(new_parent):
     current_branch = get_current_branch()
     with get_branch_tracker() as tracker:
         tracker.set_parent(current_branch, new_parent)
+    print "You may want to rebase on top of the new parent to make sure its changes are visible in this branch."
 
 
 if __name__ == '__main__':
