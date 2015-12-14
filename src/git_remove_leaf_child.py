@@ -19,6 +19,6 @@ def main(force_remove):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument("--force", "-f")
+    parser.add_argument("-f", "--force", action="store_true")
     args = parser.parse_args()
     main(args.force)

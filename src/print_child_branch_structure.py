@@ -1,7 +1,34 @@
-from git_helpers import get_branch_tracker
+import os
+import sys
+from git_helpers import get_branch_tracker, get_current_branch
+
+
+def output_supports_color():
+    """
+    Returns True if the running system's terminal supports color, and False
+    otherwise. Taken from django.core.management.color.supports_color
+    """
+    plat = sys.platform
+    supported_platform = plat != 'Pocket PC' and (plat != 'win32' or
+                                                  'ANSICON' in os.environ)
+    # isatty is not always implemented, #6223.
+    is_a_tty = hasattr(sys.stdout, 'isatty') and sys.stdout.isatty()
+    if not supported_platform or not is_a_tty:
+        return False
+    return True
+
+
+def make_green(message):
+    if output_supports_color():
+        before = "\033[0;32m"
+        after = "\033[0m"
+    else:
+        before = after = ""
+    return before + message + after
 
 
 def print_branch_structure():
+    current_branch = get_current_branch()
     with get_branch_tracker() as tracker:
         roots = []
         for parent in tracker.get_all_parents():
@@ -13,12 +40,19 @@ def print_branch_structure():
         if not first:
             print ""
         first = False
-        print root
-        print_tree(tracker, root, "")
+        print format_node(current_branch, root)
+        print_tree(tracker, current_branch, root, "")
 
 
-def look_ahead(iterable):
-    it = iter(iterable)
+def format_node(current_branch, node):
+    if node == current_branch:
+        return make_green(node)
+    else:
+        return node
+
+
+def sorted_look_ahead(iterable):
+    it = iter(sorted(iterable))
     last = it.next()
     for val in it:
         yield last, False
@@ -26,17 +60,20 @@ def look_ahead(iterable):
     yield last, True
 
 
-def print_tree(tracker, node, indent_characters):
+def print_tree(tracker, current_branch, node, indent_characters):
     # Then print the children
-    for child, is_last in look_ahead(tracker.children_for_parent(node)):
+    for child, is_last in sorted_look_ahead(tracker.children_for_parent(node)):
         print indent_characters + "|"
+
         if is_last:
-            print indent_characters + "\-- " + child
-            new_indent = indent_characters + "    "
+            prefix = "\-- "
+            child_indent = "    "
         else:
-            print indent_characters + "|-- " + child
-            new_indent = indent_characters + "|   "
-        print_tree(tracker, child, new_indent)
+            prefix = "|-- "
+            child_indent = "|   "
+        print indent_characters + prefix + format_node(current_branch, child)
+
+        print_tree(tracker, current_branch, child, indent_characters + child_indent)
 
 # Example branch structure
 """
