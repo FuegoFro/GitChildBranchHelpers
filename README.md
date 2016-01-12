@@ -36,6 +36,6 @@ In particular:
 
 - Always rebase branches with `git_rebase_children` (default alias `crb`)
 
-- Always diff branches with `arc_diff_against_child` (default alias `cad`)
+- Always diff branches with `arc_diff_against_parent` (default alias `cad`)
 
-- Always land branches with `arc_land_child_aware` (default alias `cal`)
+- Always land branches with `arc_land_onto_parent` (default alias `cal`)
