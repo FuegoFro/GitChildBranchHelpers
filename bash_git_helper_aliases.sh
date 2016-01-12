@@ -6,9 +6,9 @@ alias crb='python "$GIT_CHILD_BRANCH_HELPERS_LOCATION"/git_rebase_children.py'
 # Make branch
 alias cmk='python "$GIT_CHILD_BRANCH_HELPERS_LOCATION"/git_make_child_branch.py'
 # Arc diff
-alias cad='python "$GIT_CHILD_BRANCH_HELPERS_LOCATION"/arc_diff_against_child.py'
+alias cad='python "$GIT_CHILD_BRANCH_HELPERS_LOCATION"/arc_diff_against_parent.py'
 # Arc land
-alias cal='python "$GIT_CHILD_BRANCH_HELPERS_LOCATION"/arc_land_child_aware.py'
+alias cal='python "$GIT_CHILD_BRANCH_HELPERS_LOCATION"/arc_land_onto_paren.py'
 # Print structure
 alias cps='python "$GIT_CHILD_BRANCH_HELPERS_LOCATION"/print_child_branch_structure.py'
 # Rename
