@@ -25,7 +25,7 @@ alongside this so you can try this out with new branches you make.
 
 ## Usage
 
-Source the `bash_git_helper_aliases.sh` file in your `.bashrc`, then use the the various commands to work with your branches.
+Source the [`bash_git_helper_aliases.sh`](./bash_git_helper_aliases.sh) file in your `.bashrc`, then use the the various commands to work with your branches.
 Make sure to always use these commands when possible, rather than using the raw git alternatives, so that this can keep
 track of all the branches properly.
 
@@ -39,3 +39,5 @@ In particular:
 - Always diff branches with `arc_diff_against_parent` (default alias `cad`)
 
 - Always land branches with `arc_land_onto_parent` (default alias `cal`)
+
+For a list of all available commands, look in the [`bash_git_helper_aliases.sh`](./bash_git_helper_aliases.sh) file.
