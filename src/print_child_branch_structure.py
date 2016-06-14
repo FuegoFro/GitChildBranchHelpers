@@ -1,7 +1,12 @@
 import os
 import sys
 
-from typing import TypeVar, Iterable, Tuple
+# noinspection PyUnresolvedReferences
+from typing import (
+    Iterable,
+    Tuple,
+    TypeVar,
+)
 
 from git_helpers import get_branch_tracker, get_current_branch, BranchTracker
 
