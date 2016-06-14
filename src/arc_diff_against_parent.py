@@ -2,9 +2,11 @@ import sys
 
 from git_helpers import get_current_branch, arc, fail_if_not_rebased
 from git_rebase_children import get_branch_tracker
+from typing import List
 
 
 def main(extra_arc_diff_options):
+    # type: (List[str]) -> None
     if extra_arc_diff_options:
         extra_args = " " + " ".join(extra_arc_diff_options)
     else:

@@ -1,9 +1,13 @@
 import os
 import sys
-from git_helpers import get_branch_tracker, get_current_branch
+
+from typing import TypeVar, Iterable, Tuple
+
+from git_helpers import get_branch_tracker, get_current_branch, BranchTracker
 
 
 def output_supports_color():
+    # type: () -> bool
     """
     Returns True if the running system's terminal supports color, and False
     otherwise. Taken from django.core.management.color.supports_color
@@ -19,6 +23,7 @@ def output_supports_color():
 
 
 def make_green(message):
+    # type: (str) -> str
     if output_supports_color():
         before = "\033[0;32m"
         after = "\033[0m"
@@ -28,6 +33,7 @@ def make_green(message):
 
 
 def print_branch_structure():
+    # type: () -> None
     current_branch = get_current_branch()
     with get_branch_tracker() as tracker:
         roots = []
@@ -45,13 +51,17 @@ def print_branch_structure():
 
 
 def format_node(current_branch, node):
+    # type: (str, str) -> str
     if node == current_branch:
         return make_green(node)
     else:
         return node
 
+T = TypeVar('T')
+
 
 def sorted_look_ahead(iterable):
+    # type: (Iterable[T]) -> Iterable[Tuple[T, bool]]
     it = iter(sorted(iterable))
     last = it.next()
     for val in it:
@@ -61,6 +71,7 @@ def sorted_look_ahead(iterable):
 
 
 def print_tree(tracker, current_branch, node, indent_characters):
+    # type: (BranchTracker, str, str, str) -> None
     # Then print the children
     for child, is_last in sorted_look_ahead(tracker.children_for_parent(node)):
         print indent_characters + "|"

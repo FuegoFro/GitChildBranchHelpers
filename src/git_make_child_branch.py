@@ -4,6 +4,7 @@ from git_helpers import get_current_branch, git, get_branch_tracker, hash_for
 
 
 def make_child_branch(new_branch_name):
+    # type: (str) -> None
     current_branch = get_current_branch()
     current_rev = hash_for(current_branch)
     with get_branch_tracker() as tracker:

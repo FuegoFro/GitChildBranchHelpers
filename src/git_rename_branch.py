@@ -3,6 +3,7 @@ from git_helpers import get_current_branch, get_branch_tracker, git
 
 
 def main(new_branch_name):
+    # type: (str) -> None
     current_branch = get_current_branch()
     with get_branch_tracker() as tracker:
         git("checkout -b %s" % new_branch_name)

@@ -3,6 +3,7 @@ from git_helpers import get_current_branch, get_branch_tracker, arc, fail_if_not
 
 
 def main():
+    # type: () -> None
     current_branch = get_current_branch()
     with get_branch_tracker() as tracker:
         parent = tracker.parent_for_child(current_branch)

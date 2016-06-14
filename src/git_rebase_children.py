@@ -1,9 +1,10 @@
 import argparse
 
-from git_helpers import git, get_current_branch, get_branch_tracker, hash_for, does_branch_contain_commit
+from git_helpers import git, get_current_branch, get_branch_tracker, hash_for, does_branch_contain_commit, BranchTracker
 
 
 def do_rebase(tracker, parent, child):
+    # type: (BranchTracker, str, str) -> None
     bases = tracker.bases_for_branch(child)
 
     if len(bases) == 2:
@@ -32,6 +33,7 @@ def do_rebase(tracker, parent, child):
 
 
 def rebase_children(is_recursive):
+    # type: (bool) -> None
     current_branch = get_current_branch()
     with get_branch_tracker() as tracker:
         do_rebase(tracker, tracker.parent_for_child(current_branch), current_branch)

@@ -3,6 +3,7 @@ from git_helpers import get_current_branch, get_branch_tracker, git
 
 
 def main(force_remove):
+    # type: (bool) -> None
     current_branch = get_current_branch()
     with get_branch_tracker() as tracker:
         parent = tracker.parent_for_child(current_branch)

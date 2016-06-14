@@ -8,10 +8,12 @@ from git_helpers import git, get_current_branch, hash_for
 from git_make_child_branch import make_child_branch
 from git_rebase_children import rebase_children
 from print_child_branch_structure import print_branch_structure
+from typing import Iterator
 
 
 @contextlib.contextmanager
 def run_test(path):
+    # type: (str) -> Iterator[None]
     starting_directory = os.getcwd()
     try:
         os.chdir(path)
@@ -22,6 +24,7 @@ def run_test(path):
 
 
 def main(target_directory):
+    # type: (str) -> None
     target_directory = os.path.expanduser(target_directory)
     target_container = os.path.dirname(target_directory)
     assert not os.path.exists(target_directory)
@@ -67,7 +70,7 @@ def main(target_directory):
         # Do the recursive rebase
         print "Rebase first_branch and its children on top of master."
         git("checkout first_branch")
-        rebase_children()
+        rebase_children(True)
         assert first_commit == hash_for("first_branch")
         assert first_commit == hash_for("second_branch")
         assert first_commit == hash_for("third_branch")
@@ -85,7 +88,7 @@ def main(target_directory):
         # Rebase just second_branch. This should update third_branch but shouldn't touch sibling_branch.
         print "Doing second rebase"
         git("checkout second_branch")
-        rebase_children()
+        rebase_children(True)
         assert second_commit == hash_for("first_branch")
         assert second_commit == hash_for("second_branch")
         assert second_commit == hash_for("third_branch")
@@ -100,7 +103,7 @@ def main(target_directory):
         # This should throw since the rebase has conflicts
         print "Testing merge conflicts"
         try:
-            rebase_children()
+            rebase_children(True)
             assert False
         except subprocess.CalledProcessError:
             pass
@@ -110,7 +113,7 @@ def main(target_directory):
         # It should fail for the same reason
         print "Testing merge conflicts again"
         try:
-            rebase_children()
+            rebase_children(True)
             assert False
         except subprocess.CalledProcessError:
             pass
@@ -124,7 +127,7 @@ def main(target_directory):
         # This should effectively no-op
         print "Doing no-op rebase"
         current_commit = hash_for("HEAD")
-        rebase_children()
+        rebase_children(True)
         assert current_commit == hash_for("HEAD")
 
         print_branch_structure()
