@@ -2,7 +2,12 @@ import sys
 
 from git_helpers import get_current_branch, arc, fail_if_not_rebased
 from git_rebase_children import get_branch_tracker
-from typing import List
+
+try:
+    # noinspection PyUnresolvedReferences
+    from typing import List
+except ImportError:
+    pass
 
 
 def main(extra_arc_diff_options):

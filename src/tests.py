@@ -8,7 +8,12 @@ from git_helpers import git, get_current_branch, hash_for
 from git_make_child_branch import make_child_branch
 from git_rebase_children import rebase_children
 from print_child_branch_structure import print_branch_structure
-from typing import Iterator
+
+try:
+    # noinspection PyUnresolvedReferences
+    from typing import Iterator
+except ImportError:
+    pass
 
 
 @contextlib.contextmanager

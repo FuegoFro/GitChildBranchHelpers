@@ -4,18 +4,20 @@ import os
 import subprocess
 import shutil
 
-# noinspection PyUnresolvedReferences
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    Iterable,
-    List,
-    Tuple,
-    TypeVar,
-    Union,
-)
-
+try:
+    # noinspection PyUnresolvedReferences
+    from typing import (
+        Any,
+        Callable,
+        Dict,
+        Iterable,
+        List,
+        Tuple,
+        TypeVar,
+        Union,
+    )
+except ImportError:
+    pass
 
 def git(command):
     # type: (str) -> str

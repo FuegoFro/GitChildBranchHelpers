@@ -1,12 +1,15 @@
 import os
 import sys
 
-# noinspection PyUnresolvedReferences
-from typing import (
-    Iterable,
-    Tuple,
-    TypeVar,
-)
+try:
+    # noinspection PyUnresolvedReferences
+    from typing import (
+        Iterable,
+        Tuple,
+        TypeVar,
+    )
+except ImportError:
+    pass
 
 from git_helpers import get_branch_tracker, get_current_branch, BranchTracker
 
