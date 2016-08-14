@@ -17,3 +17,5 @@ alias crn='python "$GIT_CHILD_BRANCH_HELPERS_LOCATION"/git_rename_branch.py'
 alias crm='python "$GIT_CHILD_BRANCH_HELPERS_LOCATION"/git_remove_leaf_child.py'
 # Change parent
 alias ccp='python "$GIT_CHILD_BRANCH_HELPERS_LOCATION"/git_change_parent.py'
+# Set archived
+alias csa='python "$GIT_CHILD_BRANCH_HELPERS_LOCATION"/set_branch_archived.py'

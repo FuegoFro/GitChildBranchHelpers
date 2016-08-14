@@ -1,3 +1,4 @@
+import argparse
 import os
 import sys
 
@@ -25,9 +26,7 @@ def output_supports_color():
                                                   'ANSICON' in os.environ)
     # isatty is not always implemented, #6223.
     is_a_tty = hasattr(sys.stdout, 'isatty') and sys.stdout.isatty()
-    if not supported_platform or not is_a_tty:
-        return False
-    return True
+    return supported_platform and is_a_tty
 
 
 def make_green(message):
@@ -40,22 +39,38 @@ def make_green(message):
     return before + message + after
 
 
-def print_branch_structure():
-    # type: () -> None
+def get_branch_structure_string(show_all):
+    # type: (bool) -> str
     current_branch = get_current_branch()
+    structure_parts = []  # type: List[str]
     with get_branch_tracker() as tracker:
         roots = []
         for parent in tracker.get_all_parents():
             if not tracker.has_parent(parent):
                 roots.append(parent)
 
+        skipped_archived = _get_branch_structure_parts_internal(
+            tracker, current_branch, roots, structure_parts, show_all)
+
+        if skipped_archived:
+            structure_parts.append("(not displaying archived branches, run with --all to see them)")
+
+    return "\n".join(structure_parts)
+
+
+def _get_branch_structure_parts_internal(tracker, current_branch, roots, structure_parts, show_all):
+    # type: (BranchTracker, str, List[str], List[str], bool) -> bool
     first = True
+    skipped_archived = False
     for root in roots:
         if not first:
-            print ""
+            structure_parts.append("")
         first = False
-        print format_node(current_branch, root)
-        print_tree(tracker, current_branch, root, "")
+        structure_parts.append(format_node(current_branch, root))
+        child_skipped_archived = _add_tree_parts(tracker, current_branch, root, structure_parts, "", show_all)
+        # NOTE: Don't inline this 'or' because it will cause the recursive call not to happen due to short circuiting.
+        skipped_archived = skipped_archived or child_skipped_archived
+    return skipped_archived
 
 
 def format_node(current_branch, node):
@@ -78,11 +93,20 @@ def sorted_look_ahead(iterable):
     yield last, True
 
 
-def print_tree(tracker, current_branch, node, indent_characters):
-    # type: (BranchTracker, str, str, str) -> None
+def _add_tree_parts(tracker, current_branch, node, parts, indent_characters, show_all):
+    # type: (BranchTracker, str, str, List[str], str, bool) -> bool
     # Then print the children
-    for child, is_last in sorted_look_ahead(tracker.children_for_parent(node)):
-        print indent_characters + "|"
+    skipped_archived = False
+    children = []
+    for child in tracker.children_for_parent(node):
+        # We want to either show only the archived or only the non-archived, depending on desired_archived_status
+        if not tracker.is_archived(child) or show_all:
+            children.append(child)
+        else:
+            skipped_archived = True
+
+    for child, is_last in sorted_look_ahead(children):
+        parts.append(indent_characters + "|")
 
         if is_last:
             prefix = "\-- "
@@ -90,9 +114,14 @@ def print_tree(tracker, current_branch, node, indent_characters):
         else:
             prefix = "|-- "
             child_indent = "|   "
-        print indent_characters + prefix + format_node(current_branch, child)
+        parts.append(indent_characters + prefix + format_node(current_branch, child))
 
-        print_tree(tracker, current_branch, child, indent_characters + child_indent)
+        child_skipped_archived = _add_tree_parts(
+            tracker, current_branch, child, parts, indent_characters + child_indent, show_all)
+        # NOTE: Don't inline this 'or' because it will cause the recursive call not to happen due to short circuiting.
+        skipped_archived = skipped_archived or child_skipped_archived
+
+    return skipped_archived
 
 # Example branch structure
 """
@@ -109,4 +138,9 @@ master
 
 
 if __name__ == '__main__':
-    print_branch_structure()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-a", "--all", action="store_true",
+                        help="Set to show all branches (eg even archived branches)")
+    args = parser.parse_args()
+
+    print get_branch_structure_string(args.all)

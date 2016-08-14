@@ -1,24 +1,52 @@
 import argparse
 import contextlib
+import glob
 import os
 import shutil
+
 import subprocess
 
 from git_helpers import git, get_current_branch, hash_for
 from git_make_child_branch import make_child_branch
 from git_rebase_children import rebase_children
-from print_child_branch_structure import print_branch_structure
+from git_rename_branch import rename_current_branch
+from print_child_branch_structure import get_branch_structure_string
+from set_branch_archived import set_archived
 
 try:
     # noinspection PyUnresolvedReferences
-    from typing import Iterator
+    from typing import Iterator, Callable
 except ImportError:
     pass
+
+SRC_DIR = os.path.realpath(os.path.dirname(__file__))
+
+UNARCHIVED_PRINT_STRUCTURE = """
+master
+|
+\-- first_branch
+    |
+    |-- second_branch
+    |   |
+    |   \-- third_branch
+    |
+    \-- sibling_branch
+""".strip()
+
+ARCHIVED_PRINT_STRUCTURE = """
+master
+|
+\-- first_branch
+    |
+    \-- sibling_branch
+(not displaying archived branches, run with --all to see them)
+""".strip()
 
 
 @contextlib.contextmanager
 def run_test(path):
     # type: (str) -> Iterator[None]
+    os.mkdir(path)
     starting_directory = os.getcwd()
     try:
         os.chdir(path)
@@ -28,14 +56,40 @@ def run_test(path):
         shutil.rmtree(path)
 
 
-def main(target_directory):
+def _assert_fails(function):
+    # type: (Callable[[], None]) -> None
+    succeeded = False
+    try:
+        function()
+        succeeded = True
+    except SystemExit:
+        pass
+    assert not succeeded
+
+
+def _mypy_check():
+    # type: () -> None
+    mypy_options = [
+        "--disallow-untyped-calls",
+        "--disallow-untyped-defs",
+        "--warn-redundant-casts",
+        # "--strict-optional",
+        "--py2"
+    ]
+    python_files = glob.glob(os.path.join(SRC_DIR, "*.py"))
+    retcode = subprocess.call(["python3", "-m", "mypy"] + mypy_options + python_files)
+    if retcode != 0:
+        print "\nMyPy failed!!!\n"
+        exit(1)
+
+
+def _unit_tests(target_directory):
     # type: (str) -> None
     target_directory = os.path.expanduser(target_directory)
     target_container = os.path.dirname(target_directory)
     assert not os.path.exists(target_directory)
     assert os.path.isdir(target_container)
 
-    os.mkdir(target_directory)
     with run_test(target_directory):
         # Initialize a repo and add a first commit so we can tell what branch we're on.
         print "Initializing repo"
@@ -55,6 +109,14 @@ def main(target_directory):
         assert get_current_branch() == "second_branch"
 
         make_child_branch("third_branch")
+        assert get_current_branch() == "third_branch"
+
+        # Rename a branch
+        rename_current_branch("third_branch_renamed")
+        assert get_current_branch() == "third_branch_renamed"
+
+        # Rename it back
+        rename_current_branch("third_branch")
         assert get_current_branch() == "third_branch"
 
         # This should be sibling to second_branch, on top of first_branch
@@ -107,21 +169,13 @@ def main(target_directory):
 
         # This should throw since the rebase has conflicts
         print "Testing merge conflicts"
-        try:
-            rebase_children(True)
-            assert False
-        except subprocess.CalledProcessError:
-            pass
+        _assert_fails(lambda: rebase_children(True))
 
         # Abort the rebase and try again
         git("rebase --abort")
         # It should fail for the same reason
         print "Testing merge conflicts again"
-        try:
-            rebase_children(True)
-            assert False
-        except subprocess.CalledProcessError:
-            pass
+        _assert_fails(lambda: rebase_children(True))
 
         print "Resolving the merge conflict"
         with open(os.path.join(target_directory, "hello.txt"), "w") as f:
@@ -135,8 +189,21 @@ def main(target_directory):
         rebase_children(True)
         assert current_commit == hash_for("HEAD")
 
-        print_branch_structure()
+        assert get_branch_structure_string(False) == UNARCHIVED_PRINT_STRUCTURE
 
+        set_archived(True, "second_branch")
+        assert get_branch_structure_string(False) == ARCHIVED_PRINT_STRUCTURE
+        assert get_branch_structure_string(True) == UNARCHIVED_PRINT_STRUCTURE
+
+        git("checkout second_branch")
+        set_archived(False)
+        assert get_branch_structure_string(False) == UNARCHIVED_PRINT_STRUCTURE
+
+
+def main(target_directory):
+    # type: (str) -> None
+    _mypy_check()
+    _unit_tests(target_directory)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
