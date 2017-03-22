@@ -100,7 +100,7 @@ This solution involves a series of scripts that call through to `git` while main
 - The commit that the branch is based off of
 - Optionally, the commit that the branch is rebasing to
 
-This is stored in the repo's `.git` folder, at `child_branch_helper/branches.csv`. By keeping track of the base revision separately from the parent branch name, we're able to allow the parent branch to change and be rebased independently of the child. However, in order to iniitally obtain this information and keep it up to date, you must use these scripts for certain operations. In particular, these scripts should always be used to:
+This is stored in the repo's `.git` folder, at `child_branch_helper/branches.csv`. By keeping track of the base revision separately from the parent branch name, we're able to allow the parent branch to change and be rebased independently of the child. However, in order to initially obtain this information and keep it up to date, you must use these scripts for certain operations. In particular, these scripts should always be used to:
 
 - Make new branches - so that we have the correct parent branch name and initial base revision
 - Rebase a branch - so that we can update the base revision
