@@ -1,2 +1,3 @@
 *.pyc
 .idea/workspace.xml
+src/.mypy_cache

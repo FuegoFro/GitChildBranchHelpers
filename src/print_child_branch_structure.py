@@ -6,6 +6,7 @@ try:
     # noinspection PyUnresolvedReferences
     from typing import (
         Iterable,
+        List,
         Tuple,
         TypeVar,
     )
@@ -67,8 +68,10 @@ def _get_branch_structure_parts_internal(tracker, current_branch, roots, structu
             structure_parts.append("")
         first = False
         structure_parts.append(format_node(current_branch, root))
-        child_skipped_archived = _add_tree_parts(tracker, current_branch, root, structure_parts, "", show_all)
-        # NOTE: Don't inline this 'or' because it will cause the recursive call not to happen due to short circuiting.
+        child_skipped_archived = _add_tree_parts(
+            tracker, current_branch, root, structure_parts, "", show_all)
+        # NOTE: Don't inline this 'or' because it will cause the recursive call not to happen due
+        # to short circuiting.
         skipped_archived = skipped_archived or child_skipped_archived
     return skipped_archived
 

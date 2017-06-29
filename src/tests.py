@@ -9,6 +9,7 @@ import subprocess
 from git_helpers import git, get_current_branch, hash_for
 from git_make_child_branch import make_child_branch
 from git_rebase_children import rebase_children
+from git_remove_leaf_child import remove_branch
 from git_rename_branch import rename_current_branch
 from print_child_branch_structure import get_branch_structure_string
 from set_branch_archived import set_archived
@@ -70,20 +71,17 @@ def _assert_fails(function):
 def _mypy_check():
     # type: () -> None
     mypy_options = [
-        "--disallow-untyped-calls",
-        "--disallow-untyped-defs",
-        "--warn-redundant-casts",
-        # "--strict-optional",
+        "--strict",
         "--py2"
     ]
     python_files = glob.glob(os.path.join(SRC_DIR, "*.py"))
     retcode = subprocess.call(["python3", "-m", "mypy"] + mypy_options + python_files)
     if retcode != 0:
-        print "\nMyPy failed!!!\n"
+        print "\nMypy failed!!!\n"
         exit(1)
 
 
-def _unit_tests(target_directory):
+def _integration_test(target_directory):
     # type: (str) -> None
     target_directory = os.path.expanduser(target_directory)
     target_container = os.path.dirname(target_directory)
@@ -152,7 +150,8 @@ def _unit_tests(target_directory):
         second_commit = hash_for("HEAD")
         assert original_commit != second_commit and first_commit != second_commit
 
-        # Rebase just second_branch. This should update third_branch but shouldn't touch sibling_branch.
+        # Rebase just second_branch. This should update third_branch but shouldn't touch
+        # sibling_branch.
         print "Doing second rebase"
         git("checkout second_branch")
         rebase_children(True)
@@ -162,10 +161,28 @@ def _unit_tests(target_directory):
         assert first_commit == hash_for("sibling_branch")
 
         print "Make a merge conflict in sibling_branch"
+        # Add a new commit to the sibling branch, delete the branch, and re-create it at the
+        # revision it was at.
         git("checkout sibling_branch")
+        # Make a conflicting change on sibling so that we can test rebasing it later.
         with open(os.path.join(target_directory, "hello.txt"), "w") as f:
             f.write("Hello conflict")
         git("commit -am conflicting_change_message")
+        sibling_conflicting_commit = hash_for('HEAD')
+
+        print "Test deleting branch"
+        # See that removing fails since it's not merged
+        _assert_fails(lambda: remove_branch(force_remove=False))
+        assert get_current_branch() == 'sibling_branch'
+        assert sibling_conflicting_commit == hash_for('HEAD')
+        remove_branch(force_remove=True)
+        assert get_current_branch() == 'first_branch'
+        assert second_commit == hash_for('HEAD')
+
+        print "Test creating branch at specific revision"
+        make_child_branch('sibling_branch', sibling_conflicting_commit)
+        assert get_current_branch() == 'sibling_branch'
+        assert sibling_conflicting_commit == hash_for('HEAD')
 
         # This should throw since the rebase has conflicts
         print "Testing merge conflicts"
@@ -203,7 +220,9 @@ def _unit_tests(target_directory):
 def main(target_directory):
     # type: (str) -> None
     _mypy_check()
-    _unit_tests(target_directory)
+    _integration_test(target_directory)
+    print ""
+    print "Tests finished successfully!"
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
