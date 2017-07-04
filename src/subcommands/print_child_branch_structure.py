@@ -1,6 +1,8 @@
-import argparse
 import os
 import sys
+from argparse import ArgumentParser, Namespace
+
+from subcommands.base_command import BaseCommand
 
 try:
     # noinspection PyUnresolvedReferences
@@ -14,6 +16,25 @@ except ImportError:
     pass
 
 from git_helpers import get_branch_tracker, get_current_branch, BranchTracker
+
+
+class PrintChildBranchStrucutre(BaseCommand):
+    def get_name(self):
+        # type: () -> str
+        return 'print-structure'
+
+    def get_short_description(self):
+        # type: () -> str
+        return 'prints the dependency structure of the branches'
+
+    def inflate_subcommand_parser(self, parser):
+        # type: (ArgumentParser) -> None
+        parser.add_argument("-a", "--all", action="store_true",
+                            help="set to show all branches, including archived branches")
+
+    def run_command(self, args):
+        # type: (Namespace) -> None
+        print get_branch_structure_string(args.all)
 
 
 def output_supports_color():
@@ -102,7 +123,8 @@ def _add_tree_parts(tracker, current_branch, node, parts, indent_characters, sho
     skipped_archived = False
     children = []
     for child in tracker.children_for_parent(node):
-        # We want to either show only the archived or only the non-archived, depending on desired_archived_status
+        # We want to either show only the archived or only the non-archived, depending on
+        # desired_archived_status
         if not tracker.is_archived(child) or show_all:
             children.append(child)
         else:
@@ -121,7 +143,8 @@ def _add_tree_parts(tracker, current_branch, node, parts, indent_characters, sho
 
         child_skipped_archived = _add_tree_parts(
             tracker, current_branch, child, parts, indent_characters + child_indent, show_all)
-        # NOTE: Don't inline this 'or' because it will cause the recursive call not to happen due to short circuiting.
+        # NOTE: Don't inline this 'or' because it will cause the recursive call not to happen due
+        # to short circuiting.
         skipped_archived = skipped_archived or child_skipped_archived
 
     return skipped_archived
@@ -138,12 +161,3 @@ master
     |
     \-- sibling_branch
 """
-
-
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-a", "--all", action="store_true",
-                        help="Set to show all branches (eg even archived branches)")
-    args = parser.parse_args()
-
-    print get_branch_structure_string(args.all)

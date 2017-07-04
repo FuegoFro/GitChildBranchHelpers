@@ -1,6 +1,36 @@
-import argparse
+from argparse import ArgumentParser, Namespace
 
-from git_helpers import git, get_current_branch, get_branch_tracker, hash_for, does_branch_contain_commit, BranchTracker
+from git_helpers import (
+    BranchTracker,
+    does_branch_contain_commit,
+    get_branch_tracker,
+    get_current_branch,
+    git,
+    hash_for,
+)
+from subcommands.base_command import BaseCommand
+
+
+class GitRebaseOntoParent(BaseCommand):
+    def get_name(self):
+        # type: () -> str
+        return 'rebase'
+
+    def get_short_description(self):
+        # type: () -> str
+        return 'rebase the current branch onto its parent'
+
+    def inflate_subcommand_parser(self, parser):
+        # type: (ArgumentParser) -> None
+        parser.add_argument(
+            "-r", "--recursive",
+            action="store_true",
+            help="if set, will recursively rebase all sub-branches onto their parents",
+        )
+
+    def run_command(self, args):
+        # type: (Namespace) -> None
+        rebase_children(args.recursive)
 
 
 def do_rebase(tracker, parent, child):
@@ -49,11 +79,3 @@ def rebase_children(is_recursive):
 
         # Go back to where we started.
         git("checkout %s" % current_branch)
-
-
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-r", "--recursive", action="store_true",
-                        help="If set, will recursively rebase all sub-branches")
-    args = parser.parse_args()
-    rebase_children(args.recursive)

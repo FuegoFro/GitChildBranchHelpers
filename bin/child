@@ -1,0 +1,13 @@
+#!/usr/bin/env python
+import os
+
+import sys
+
+REPO_ROOT = os.path.join(os.path.dirname(__file__), os.pardir)
+SRC_DIR = os.path.join(REPO_ROOT, 'src')
+
+
+if __name__ == '__main__':
+    sys.path.append(SRC_DIR)
+    from main import main
+    main()

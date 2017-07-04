@@ -1,6 +1,30 @@
-import argparse
+from argparse import ArgumentParser, Namespace
 
 from git_helpers import get_branch_tracker, get_current_branch, git, hash_for
+from subcommands.base_command import BaseCommand
+
+
+class GitRemoveLeafBranch(BaseCommand):
+    def get_name(self):
+        # type: () -> str
+        return 'remove-branch'
+
+    def get_short_description(self):
+        # type: () -> str
+        return 'deletes the current branch, if it is merged into its parent'
+
+    def inflate_subcommand_parser(self, parser):
+        # type: (ArgumentParser) -> None
+        parser.add_argument(
+            "-f", "--force",
+            action="store_true",
+            help='forces the current branch to be removed even if it has not been merged into its '
+                 'parent',
+        )
+
+    def run_command(self, args):
+        # type: (Namespace) -> None
+        remove_branch(args.force)
 
 
 def remove_branch(force_remove):
@@ -41,10 +65,3 @@ def remove_branch(force_remove):
         git("branch %s %s" % (delete_flag, current_branch))
 
         tracker.remove_child_leaf(current_branch)
-
-
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-f", "--force", action="store_true")
-    args = parser.parse_args()
-    remove_branch(args.force)

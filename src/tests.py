@@ -3,16 +3,16 @@ import contextlib
 import glob
 import os
 import shutil
-
 import subprocess
 
-from git_helpers import git, get_current_branch, hash_for
-from git_make_child_branch import make_child_branch
-from git_rebase_children import rebase_children
-from git_remove_leaf_child import remove_branch
-from git_rename_branch import rename_current_branch
-from print_child_branch_structure import get_branch_structure_string
-from set_branch_archived import set_archived
+from subcommands.git_rebase_children import rebase_children
+from subcommands.git_remove_leaf_child import remove_branch
+from subcommands.git_rename_branch import rename_current_branch
+from subcommands.print_child_branch_structure import get_branch_structure_string
+from subcommands.set_branch_archived import set_archived
+
+from subcommands.git_make_child_branch import make_child_branch
+from git_helpers import get_current_branch, git, hash_for
 
 try:
     # noinspection PyUnresolvedReferences
