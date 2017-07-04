@@ -30,7 +30,7 @@ M1--M2 <= master
           \--D1 <=feature_d
 ```
 
-There are two primary operations to support, given a commit graph like the one above. The first is propagating changes to child branches. Let's say commit `A3` contains a crucial fix or breaking change that needs to be taken into account in a few of the other feature branches. What we can do is checkout the `feature_a` branch and propagate our changes. This will recursively cause each child branch to rebase onto the tip of its parent branch. The [`child rebase`](src/commands/git_rebase_children.py) command does this currently (though it will also rebase the current branch on top of its parent, which is not done in this example). The result would be as follows:
+There are two primary operations to support, given a commit graph like the one above. The first is propagating changes to child branches. Let's say commit `A3` contains a crucial fix or breaking change that needs to be taken into account in a few of the other feature branches. What we can do is checkout the `feature_a` branch and propagate our changes. This will recursively cause each child branch to rebase onto the tip of its parent branch. The [`child rebase`](src/subcommands/git_rebase_children.py) command does this currently (though it will also rebase the current branch on top of its parent, which is not done in this example). The result would be as follows:
 
 ```
 M1--M2 <= master
@@ -82,10 +82,10 @@ track of all the branches properly.
 
 In particular:
 
-- Always create branches with the [`child make-branch`](src/commands/git_make_child_branch.py) command (default alias `cmk`), even if the branch is off of master.
-- Always rebase branches with [`child rebase`](src/commands/git_rebase_children.py) (default alias `crb`)
-- Always diff branches with [`child arc-diff`](src/commands/arc_diff_against_parent.py) (default alias `cad`)
-- Always land branches with [`child arc-land`](src/commands/arc_land_onto_parent.py) (default alias `cal`)
+- Always create branches with the [`child make-branch`](src/subcommands/git_make_child_branch.py) command (default alias `cmk`), even if the branch is off of master.
+- Always rebase branches with [`child rebase`](src/subcommands/git_rebase_children.py) (default alias `crb`)
+- Always diff branches with [`child arc-diff`](src/subcommands/arc_diff_against_parent.py) (default alias `cad`)
+- Always land branches with [`child arc-land`](src/subcommands/arc_land_onto_parent.py) (default alias `cal`)
 
 For a list of all available commands, run `child -h`. For the list of default aliases, look in the [`bash_zsh_git_helper_aliases.sh`](./bash_zsh_git_helper_aliases.sh) file.
 

@@ -8,8 +8,9 @@ def main():
     # type: () -> None
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(
-        description='valid subcommands',
-        help='run <subcommand> -h for more details',
+        title='actions',
+        description='valid actions',
+        help='run <action> -h for more details',
     )
 
     for command in get_commands():
