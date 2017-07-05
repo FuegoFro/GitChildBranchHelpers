@@ -45,7 +45,7 @@ def do_rebase(tracker, parent, child):
         assert has_first_base or has_second_base
         if has_first_base and has_second_base:
             # Choose the newer one. The older one will be the merge base of the two
-            older_base = git("merge-base %s %s" % (first_base, second_base))
+            older_base = git("merge-base {} {}".format(first_base, second_base))
             first_is_newer = older_base == second_base
             base = first_base if first_is_newer else second_base
         else:
@@ -58,7 +58,7 @@ def do_rebase(tracker, parent, child):
     parent_rev = hash_for(parent)
 
     tracker.start_rebase(child, parent_rev)
-    git("rebase --onto %s %s %s" % (parent, base, child))
+    git("rebase --onto {} {} {}".format(parent, base, child))
     tracker.finish_rebase(child, parent_rev)
 
 
@@ -78,4 +78,4 @@ def rebase_children(is_recursive):
                     to_rebase_onto.append(child)
 
         # Go back to where we started.
-        git("checkout %s" % current_branch)
+        git("checkout {}".format(current_branch))

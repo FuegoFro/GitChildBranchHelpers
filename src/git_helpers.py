@@ -49,7 +49,7 @@ def get_branch_tracker():
 
 def does_branch_contain_commit(branch, commit):
     # type: (str, str) -> bool
-    return git("branch --contains %s" % commit).find(" %s\n" % branch) >= 0
+    return git("branch --contains {}".format(commit)).find(" {}\n".format(branch)) >= 0
 
 
 def fail_if_not_rebased(current_branch, parent, tracker):
@@ -75,14 +75,14 @@ def run_command_expecting_failure(command_runner, program, command):
     except subprocess.CalledProcessError:
         print ""
         print "!!!!!!!!"
-        print "!!! Failed to run/finish %s command:" % program
-        print "!!! `%s %s`" % (program, command)
+        print "!!! Failed to run/finish {} command:".format(program)
+        print "!!! `{} {}`".format(program, command)
         print "!!!!!!!!"
         print ""
         exit(1)
     except KeyboardInterrupt:
         print ""
-        print "User aborted command: `%s %s`" % (program, command)
+        print "User aborted command: `{} {}`".format(program, command)
         print ""
         exit(1)
 
@@ -289,7 +289,8 @@ class BranchTracker(object):
     def remove_child_leaf(self, child_leaf):
         # type: (str) -> None
         children = self._parent_to_children[child_leaf]
-        assert not children, "Expected branch to be a leaf node, had %s child(ren)." % len(children)
+        assert not children, "Expected branch to be a leaf node, had {} child(ren).".format(
+            len(children))
 
         if child_leaf in self._child_to_parent:
             parent = self._child_to_parent.pop(child_leaf)
@@ -315,4 +316,4 @@ class BranchTracker(object):
 
 def hash_for(rev):
     # type: (str) -> str
-    return git("rev-parse --verify %s" % rev).strip()
+    return git("rev-parse --verify {}".format(rev)).strip()

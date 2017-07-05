@@ -38,13 +38,13 @@ class ArcLandOntoParent(BaseCommand):
 
             if parent != "master":
                 should_land = raw_input("Are you sure you want to land onto non-master branch "
-                                        "'%s'? [y/N] " % parent)
+                                        "'{}'? [y/N] ".format(parent))
                 should_land = should_land.lower()
                 if should_land not in ("y", "yes"):
                     print "Aborting land"
                     exit()
 
-            arc("land --onto %s%s" % (parent, extra_args))
+            arc("land --onto {}{}".format(parent, extra_args))
 
             # Successfully landed, replace ourselves with our parent
             tracker.collapse_and_remove_parent(current_branch)

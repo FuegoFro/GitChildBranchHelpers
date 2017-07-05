@@ -42,14 +42,14 @@ def make_child_branch(new_branch_name, revision=None):
         base_rev = hash_for("HEAD")
     else:
         # Use the merge-base of the given revision and the parent branch as the base
-        base_rev = git("merge-base %s %s" % (parent, revision)).strip()
+        base_rev = git("merge-base {} {}".format(parent, revision)).strip()
 
     with get_branch_tracker() as tracker:
         # Add the child using the current branch as the parent.
         tracker.add_child_for_parent(parent, new_branch_name, base_rev)
         # Make the new branch, either where the current branch is or at the specified revision
         if revision is None:
-            command = "checkout -b %s" % new_branch_name
+            command = "checkout -b {}".format(new_branch_name)
         else:
-            command = "checkout -b %s %s" % (new_branch_name, revision)
+            command = "checkout -b {} {}".format(new_branch_name, revision)
         git(command)

@@ -36,4 +36,4 @@ class ArcDiffAgainstParent(BaseCommand):
         with get_branch_tracker() as tracker:
             parent = tracker.parent_for_child(current_branch)
             fail_if_not_rebased(current_branch, parent, tracker)
-            arc("diff %s%s" % (parent, extra_args))
+            arc("diff {}{}".format(parent, extra_args))
