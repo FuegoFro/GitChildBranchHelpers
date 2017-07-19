@@ -28,6 +28,10 @@ class ArcDiffAgainstParent(BaseCommand):
         # type: (Namespace) -> None
         extra_arc_diff_options = args.arc_diff_args
         if extra_arc_diff_options:
+            # If the first extra arg starts with "-", "--" must also have been passed, and
+            # argparse doesn't remove it for us
+            if "--" in extra_arc_diff_options:
+                extra_arc_diff_options.remove("--")
             extra_args = " " + " ".join(extra_arc_diff_options)
         else:
             extra_args = ""
