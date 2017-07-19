@@ -29,8 +29,8 @@ class ArcLandOntoParent(BaseCommand):
         if extra_arc_land_options:
             # If the first extra arg starts with "-", "--" must also have been passed, and
             # argparse doesn't remove it for us
-            if "--" in extra_arc_land_options:
-                extra_arc_land_options.remove("--")
+            if extra_arc_land_options[0] == "--":
+                del extra_arc_land_options[0]
             extra_args = " " + " ".join(extra_arc_land_options)
         else:
             extra_args = ""
