@@ -12,19 +12,19 @@ if [ -e "$GIT_CHILD_BRANCH_HELPERS_LOCATION" ]; then
     # Rebase
     alias crb='"$GIT_CHILD_BRANCH_HELPERS_LOCATION" rebase'
     # Make branch
-    alias cmk='python "$GIT_CHILD_BRANCH_HELPERS_LOCATION" make-branch'
+    alias cmk='"$GIT_CHILD_BRANCH_HELPERS_LOCATION" make-branch'
     # Arc diff
-    alias cad='python "$GIT_CHILD_BRANCH_HELPERS_LOCATION" arc-diff'
+    alias cad='"$GIT_CHILD_BRANCH_HELPERS_LOCATION" arc-diff'
     # Arc land
-    alias cal='python "$GIT_CHILD_BRANCH_HELPERS_LOCATION" arc-land'
+    alias cal='"$GIT_CHILD_BRANCH_HELPERS_LOCATION" arc-land'
     # Print structure
-    alias cps='python "$GIT_CHILD_BRANCH_HELPERS_LOCATION" print-structure'
+    alias cps='"$GIT_CHILD_BRANCH_HELPERS_LOCATION" print-structure'
     # Rename
-    alias crn='python "$GIT_CHILD_BRANCH_HELPERS_LOCATION" rename'
+    alias crn='"$GIT_CHILD_BRANCH_HELPERS_LOCATION" rename'
     # Remove leaf child
-    alias crm='python "$GIT_CHILD_BRANCH_HELPERS_LOCATION" remove-branch'
+    alias crm='"$GIT_CHILD_BRANCH_HELPERS_LOCATION" remove-branch'
     # Change parent
-    alias ccp='python "$GIT_CHILD_BRANCH_HELPERS_LOCATION" change-parent'
+    alias ccp='"$GIT_CHILD_BRANCH_HELPERS_LOCATION" change-parent'
     # Set archived
-    alias csa='python "$GIT_CHILD_BRANCH_HELPERS_LOCATION" set-archived'
+    alias csa='"$GIT_CHILD_BRANCH_HELPERS_LOCATION" set-archived'
 fi
