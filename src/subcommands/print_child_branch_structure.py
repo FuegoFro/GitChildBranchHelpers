@@ -1,3 +1,4 @@
+# coding=utf-8
 import os
 import sys
 from argparse import ArgumentParser, Namespace
@@ -131,14 +132,14 @@ def _add_tree_parts(tracker, current_branch, node, parts, indent_characters, sho
             skipped_archived = True
 
     for child, is_last in sorted_look_ahead(children):
-        parts.append(indent_characters + "|")
+        parts.append(indent_characters + "│")
 
         if is_last:
-            prefix = "\-- "
+            prefix = "└── "
             child_indent = "    "
         else:
-            prefix = "|-- "
-            child_indent = "|   "
+            prefix = "├── "
+            child_indent = "│   "
         parts.append(indent_characters + prefix + format_node(current_branch, child))
 
         child_skipped_archived = _add_tree_parts(
@@ -152,12 +153,12 @@ def _add_tree_parts(tracker, current_branch, node, parts, indent_characters, sho
 # Example branch structure
 """
 master
-|
-\-- first_branch
-    |
-    |-- second_branch
-    |   |
-    |   \-- third_branch
-    |
-    \-- sibling_branch
+│
+└── first_branch
+    │
+    ├── second_branch
+    │   │
+    │   └── third_branch
+    │
+    └── sibling_branch
 """
