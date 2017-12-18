@@ -30,6 +30,7 @@ def get_commands():
     # type: () -> Sequence[_BaseCommand]
     seen_command_names = set()  # type: Set[str]
     for subcommand in _ALL_COMMANDS:
-        assert subcommand.get_name() not in seen_command_names, "TODO RIGHT NOW NORELEASE - message"
-        seen_command_names.add(subcommand.get_name())
+        subcommand_name = subcommand.get_name()
+        assert subcommand_name not in seen_command_names, "Duplicate command name: {}".format(subcommand_name)
+        seen_command_names.add(subcommand_name)
     return sorted(_ALL_COMMANDS, key=lambda cmd: cmd.get_name())
