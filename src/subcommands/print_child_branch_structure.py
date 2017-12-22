@@ -19,7 +19,7 @@ except ImportError:
 from git_helpers import get_branch_tracker, get_current_branch, BranchTracker
 
 
-class PrintChildBranchStrucutre(BaseCommand):
+class PrintChildBranchStructure(BaseCommand):
     def get_name(self):
         # type: () -> str
         return 'print-structure'
@@ -71,6 +71,7 @@ def get_branch_structure_string(show_all):
         for parent in tracker.get_all_parents():
             if not tracker.has_parent(parent):
                 roots.append(parent)
+        roots = sorted(roots)
 
         skipped_archived = _get_branch_structure_parts_internal(
             tracker, current_branch, roots, structure_parts, show_all)
