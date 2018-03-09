@@ -2,17 +2,20 @@ import argparse
 from argparse import ArgumentParser, Namespace
 
 from git_helpers import arc, fail_if_not_rebased, get_current_branch
-from subcommands.git_rebase_children import get_branch_tracker
 from subcommands.base_command import BaseCommand
+from subcommands.git_rebase_children import get_branch_tracker
+
+if False:
+    from typing import Text
 
 
 class ArcDiffAgainstParent(BaseCommand):
     def get_name(self):
-        # type: () -> str
+        # type: () -> Text
         return 'arc-diff'
 
     def get_short_description(self):
-        # type: () -> str
+        # type: () -> Text
         return '`arc diff` this branch against its parent branch'
 
     def inflate_subcommand_parser(self, parser):

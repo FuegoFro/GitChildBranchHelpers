@@ -5,18 +5,18 @@ from subcommands.base_command import BaseCommand
 
 try:
     # noinspection PyUnresolvedReferences
-    from typing import Optional
+    from typing import Optional, Text
 except ImportError:
     pass
 
 
 class GitMakeChildBranch(BaseCommand):
     def get_name(self):
-        # type: () -> str
+        # type: () -> Text
         return 'make-branch'
 
     def get_short_description(self):
-        # type: () -> str
+        # type: () -> Text
         return 'creates a new branch at the current commit with the current branch as its parent'
 
     def inflate_subcommand_parser(self, parser):
@@ -35,7 +35,7 @@ class GitMakeChildBranch(BaseCommand):
 
 
 def make_child_branch(new_branch_name, revision=None):
-    # type: (str, Optional[str]) -> None
+    # type: (Text, Optional[Text]) -> None
     parent = get_current_branch()
     if revision is None:
         # Use the current revision as the base

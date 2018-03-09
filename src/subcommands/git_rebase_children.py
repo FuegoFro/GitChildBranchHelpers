@@ -10,14 +10,17 @@ from git_helpers import (
 )
 from subcommands.base_command import BaseCommand
 
+if False:
+    from typing import Text
+
 
 class GitRebaseOntoParent(BaseCommand):
     def get_name(self):
-        # type: () -> str
+        # type: () -> Text
         return 'rebase'
 
     def get_short_description(self):
-        # type: () -> str
+        # type: () -> Text
         return 'rebase the current branch onto its parent'
 
     def inflate_subcommand_parser(self, parser):
@@ -34,7 +37,7 @@ class GitRebaseOntoParent(BaseCommand):
 
 
 def do_rebase(tracker, parent, child):
-    # type: (BranchTracker, str, str) -> None
+    # type: (BranchTracker, Text, Text) -> None
     bases = tracker.bases_for_branch(child)
 
     if len(bases) == 2:

@@ -1,17 +1,23 @@
+from __future__ import print_function
+
 import argparse
+import sys
 from argparse import ArgumentParser, Namespace
 
 from git_helpers import arc, fail_if_not_rebased, get_branch_tracker, get_current_branch
 from subcommands.base_command import BaseCommand
 
+if False:
+    from typing import Text
+
 
 class ArcLandOntoParent(BaseCommand):
     def get_name(self):
-        # type: () -> str
+        # type: () -> Text
         return 'arc-land'
 
     def get_short_description(self):
-        # type: () -> str
+        # type: () -> Text
         return '`arc land` this branch onto its parent branch'
 
     def inflate_subcommand_parser(self, parser):
@@ -41,11 +47,15 @@ class ArcLandOntoParent(BaseCommand):
             fail_if_not_rebased(current_branch, parent, tracker)
 
             if parent != "master":
-                should_land = raw_input("Are you sure you want to land onto non-master branch "
-                                        "'{}'? [y/N] ".format(parent))
+                if sys.version_info[0] >= 3:
+                    input_func = input
+                else:
+                    input_func = raw_input
+                should_land = input_func("Are you sure you want to land onto non-master branch "
+                                         "'{}'? [y/N] ".format(parent))
                 should_land = should_land.lower()
                 if should_land not in ("y", "yes"):
-                    print "Aborting land"
+                    print("Aborting land")
                     exit()
 
             arc("land --onto {}{}".format(parent, extra_args))

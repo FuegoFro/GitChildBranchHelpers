@@ -1,18 +1,19 @@
 from argparse import ArgumentParser, Namespace
 
-from typing import Optional
-
 from git_helpers import get_branch_tracker, get_current_branch
 from subcommands.base_command import BaseCommand
+
+if False:
+    from typing import Optional, Text
 
 
 class SetBranchArchived(BaseCommand):
     def get_name(self):
-        # type: () -> str
+        # type: () -> Text
         return 'set-archived'
 
     def get_short_description(self):
-        # type: () -> str
+        # type: () -> Text
         return "sets whether or not a branch is 'archived'"
 
     def inflate_subcommand_parser(self, parser):
@@ -29,7 +30,7 @@ class SetBranchArchived(BaseCommand):
 
 
 def set_archived(archived, branch_name=None):
-    # type: (bool, Optional[str]) -> None
+    # type: (bool, Optional[Text]) -> None
     if branch_name is None:
         branch_name = get_current_branch()
     with get_branch_tracker() as tracker:

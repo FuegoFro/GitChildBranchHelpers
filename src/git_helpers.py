@@ -1,8 +1,12 @@
-from collections import defaultdict
+from __future__ import print_function, unicode_literals
+
+import _csv
 import csv
 import os
-import subprocess
 import shutil
+import subprocess
+import sys
+from collections import defaultdict
 
 try:
     # noinspection PyUnresolvedReferences
@@ -17,18 +21,25 @@ try:
         Tuple,
         TypeVar,
         Union,
+        Text,
+        TextIO,
+        cast,
     )
 except ImportError:
     pass
 
 
 def git(command):
-    # type: (str) -> str
-    return run_command_expecting_failure(subprocess.check_output, "git", command)
+    # type: (Text) -> Text
+    ret = run_command_expecting_failure(subprocess.check_output, "git", command).decode()
+    if sys.version_info[0] >= 3:
+        return cast(Text, ret)
+    else:
+        return ret
 
 
 def get_current_branch():
-    # type: () -> str
+    # type: () -> Text
     return git("rev-parse --abbrev-ref HEAD").strip()
 
 
@@ -48,48 +59,61 @@ def get_branch_tracker():
 
 
 def does_branch_contain_commit(branch, commit):
-    # type: (str, str) -> bool
-    return git("branch --contains {}".format(commit)).find(" {}\n".format(branch)) >= 0
+    # type: (Text, Text) -> bool
+    try:
+        return git("branch --contains {}".format(commit)).find(" {}\n".format(branch)) >= 0
+    except SystemExit:
+        return False
 
 
 def fail_if_not_rebased(current_branch, parent, tracker):
-    # type: (str, str, BranchTracker) -> None
+    # type: (Text, Text, BranchTracker) -> None
     bases = tracker.bases_for_branch(current_branch)
     assert len(bases) in (1, 2)
     if len(bases) == 2 or not does_branch_contain_commit(parent, bases[0]):
-        print "Please rebase this branch on top of its parent"
+        print("Please rebase this branch on top of its parent")
         exit()
 
 
 def arc(command):
-    # type: (str) -> None
+    # type: (Text) -> None
     run_command_expecting_failure(subprocess.check_call, "arc", command)
+
 
 T = TypeVar('T')
 
 
 def run_command_expecting_failure(command_runner, program, command):
-    # type: (Callable[[List[str]], T], str, str) -> T
+    # type: (Callable[[List[Text]], T], Text, Text) -> T
     try:
         return command_runner([program] + command.split(" "))
     except subprocess.CalledProcessError:
-        print ""
-        print "!!!!!!!!"
-        print "!!! Failed to run/finish {} command:".format(program)
-        print "!!! `{} {}`".format(program, command)
-        print "!!!!!!!!"
-        print ""
+        print("")
+        print("!!!!!!!!")
+        print("!!! Failed to run/finish {} command:".format(program))
+        print("!!! `{} {}`".format(program, command))
+        print("!!!!!!!!")
+        print("")
         exit(1)
     except KeyboardInterrupt:
-        print ""
-        print "User aborted command: `{} {}`".format(program, command)
-        print ""
+        print("")
+        print("User aborted command: `{} {}`".format(program, command))
+        print("")
         exit(1)
+
+
+def get_csv_reader(f):
+    # type: (BinaryIO) -> _csv._reader
+    if sys.version_info[0] >= 3:
+        generator = (line.decode() for line in f)
+    else:
+        generator = (str(line) for line in f)
+    return csv.reader(generator)
 
 
 class BranchTrackerWrapper(object):
     def __init__(self, config_file):
-        # type: (str) -> None
+        # type: (Text) -> None
         super(BranchTrackerWrapper, self).__init__()
         self.config_file = config_file
 
@@ -108,18 +132,19 @@ class BranchTracker(object):
     _VERSION_ROW_ID = "version"
 
     def __init__(self, config_file):
-        # type: (str) -> None
+        # type: (Text) -> None
         super(BranchTracker, self).__init__()
         self._config_file = config_file
-        self._child_to_parent = {}  # type: Dict[str, str]
-        self._parent_to_children = defaultdict(list)  # type: Dict[str, List[str]]
-        self._branch_to_bases = {}  # type: Dict[str, Tuple[str, ...]]
-        self._is_branch_archived = {}  # type: Dict[str, bool]
+        self._child_to_parent = {}  # type: Dict[Text, Text]
+        self._parent_to_children = defaultdict(list)  # type: Dict[Text, List[Text]]
+        self._branch_to_bases = {}  # type: Dict[Text, Tuple[Text, ...]]
+        self._is_branch_archived = {}  # type: Dict[Text, bool]
         # Read config file
-        with open(config_file, "r") as f:
-            # Run migrations as necessary. This will re-write the stored file before we read any branch data from it.
+        with open(config_file, "rb") as f:
+            # Run migrations as necessary. This will re-write the stored file before we read any
+            # branch data from it.
             self._version = self._run_migrations(f)
-            reader = csv.reader(f)
+            reader = get_csv_reader(f)
             # We don't need to handle the version row, since that'll be handled by _run_migrations
             for row in reader:
                 child, parent, base, rebase_base, is_archived = row
@@ -137,8 +162,9 @@ class BranchTracker(object):
     def _run_migrations(self, f):
         # type: (BinaryIO) -> int
         """
-        Migrates the file if necessary. Once this method finishes, the file will have the latest version's format and
-        the passed in file object will be pointing at the first row of data.
+        Migrates the file if necessary. Once this method finishes, the file will have the latest
+        version's format and the passed in file object will be pointing at the first row of data.
+
         :param f: A file object pointing to the branch data file
         :return: The current version of the file
         """
@@ -169,8 +195,9 @@ class BranchTracker(object):
         # type: (BinaryIO) -> int
         # If there are no rows in the file, assume we're on version 0
         version = 0
-        reader = csv.reader(f)
-        # We only want to look at the first line, but the easiest way to do that is a for loop with a break.
+        reader = get_csv_reader(f)
+        # We only want to look at the first line, but the easiest way to do that is a for loop with
+        # a break.
         for version_row in reader:
             if len(version_row) == 2:
                 version_row_id, version_str = version_row
@@ -182,18 +209,19 @@ class BranchTracker(object):
 
     @staticmethod
     def _get_migrations():
-        # type: () -> Tuple[Callable[[str], None], ...]
+        # type: () -> Tuple[Callable[[Text], None], ...]
         # Add a notion of an archived field
         def m001_add_archived_field(config_file):
-            # type: (str) -> None
-            # Because this migration introduces versions, we have to add the initial version to the file.
+            # type: (Text) -> None
+            # Because this migration introduces versions, we have to add the initial version to the
+            # file.
             migrated_file_contents = ["version,1\n"]
             # Add the archived field to each entry, defaulting to False.
             with open(config_file, 'r') as f:
                 for line in f:
                     migrated_file_contents += [line.rstrip() + ",False\n"]
-            with open(config_file, 'w') as f:
-                f.write("".join(migrated_file_contents))
+            with open(config_file, 'wb') as f_out:
+                f_out.write("".join(migrated_file_contents).encode())
 
         return (
             m001_add_archived_field,
@@ -217,27 +245,27 @@ class BranchTracker(object):
         shutil.move(tmp_config_file, self._config_file)
 
     def parent_for_child(self, child):
-        # type: (str) -> str
+        # type: (Text) -> Text
         return self._child_to_parent[child]
 
     def children_for_parent(self, parent):
-        # type: (str) -> List[str]
+        # type: (Text) -> List[Text]
         return self._parent_to_children[parent]
 
     def bases_for_branch(self, branch):
-        # type: (str) -> Tuple[str,...]
+        # type: (Text) -> Tuple[Text,...]
         return self._branch_to_bases[branch]
 
     def get_all_parents(self):
-        # type: () -> Iterable[str]
+        # type: () -> Iterable[Text]
         return self._parent_to_children.keys()
 
     def has_parent(self, branch):
-        # type: (str) -> bool
+        # type: (Text) -> bool
         return branch in self._child_to_parent
 
     def collapse_and_remove_parent(self, old_parent):
-        # type: (str) -> None
+        # type: (Text) -> None
         # Remove the old parent from its parent, use that as the new parent
         new_parent = self._child_to_parent.pop(old_parent)
         self._parent_to_children[new_parent].remove(old_parent)
@@ -253,26 +281,26 @@ class BranchTracker(object):
                 self._child_to_parent[child] = new_parent
 
     def add_child_for_parent(self, parent, new_child, child_base):
-        # type: (str, str, str) -> None
+        # type: (Text, Text, Text) -> None
         self._child_to_parent[new_child] = parent
         self._parent_to_children[parent].append(new_child)
         self._branch_to_bases[new_child] = (child_base, )
         self._is_branch_archived[new_child] = False
 
     def start_rebase(self, branch, new_base):
-        # type: (str, str) -> None
+        # type: (Text, Text) -> None
         bases = self._branch_to_bases[branch]
         assert len(bases) == 1
         self._branch_to_bases[branch] = bases + (new_base, )
 
     def finish_rebase(self, branch, new_base):
-        # type: (str, str) -> None
+        # type: (Text, Text) -> None
         bases = self._branch_to_bases[branch]
         assert len(bases) == 2
         self._branch_to_bases[branch] = (new_base, )
 
     def rename_branch(self, old_branch, new_branch):
-        # type: (str, str) -> None
+        # type: (Text, Text) -> None
         self._branch_to_bases[new_branch] = self._branch_to_bases.pop(old_branch)
         self._is_branch_archived[new_branch] = self._is_branch_archived.pop(old_branch)
 
@@ -287,7 +315,7 @@ class BranchTracker(object):
                 self._child_to_parent[child] = new_branch
 
     def remove_child_leaf(self, child_leaf):
-        # type: (str) -> None
+        # type: (Text) -> None
         children = self._parent_to_children[child_leaf]
         assert not children, "Expected branch to be a leaf node, had {} child(ren).".format(
             len(children))
@@ -297,7 +325,7 @@ class BranchTracker(object):
             self._parent_to_children[parent].remove(child_leaf)
 
     def set_parent(self, child, new_parent):
-        # type: (str, str) -> None
+        # type: (Text, Text) -> None
         if child in self._child_to_parent:
             old_parent = self._child_to_parent[child]
             self._parent_to_children[old_parent].remove(child)
@@ -306,14 +334,14 @@ class BranchTracker(object):
         self._parent_to_children[new_parent].append(child)
 
     def set_is_archived(self, branch, is_archived):
-        # type: (str, bool) -> None
+        # type: (Text, bool) -> None
         self._is_branch_archived[branch] = is_archived
 
     def is_archived(self, branch):
-        # type: (str) -> bool
+        # type: (Text) -> bool
         return self._is_branch_archived[branch]
 
 
 def hash_for(rev):
-    # type: (str) -> str
+    # type: (Text) -> Text
     return git("rev-parse --verify {}".format(rev)).strip()
