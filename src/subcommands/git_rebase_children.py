@@ -38,27 +38,10 @@ class GitRebaseOntoParent(BaseCommand):
 
 def do_rebase(tracker, parent, child):
     # type: (BranchTracker, Text, Text) -> None
-    bases = tracker.bases_for_branch(child)
-
-    if len(bases) == 2:
-        first_base, second_base = bases
-        has_first_base = does_branch_contain_commit(child, first_base)
-        has_second_base = does_branch_contain_commit(child, second_base)
-        # Should have at least one of the two bases
-        assert has_first_base or has_second_base
-        if has_first_base and has_second_base:
-            # Choose the newer one. The older one will be the merge base of the two
-            older_base = git("merge-base {} {}".format(first_base, second_base))
-            first_is_newer = older_base == second_base
-            base = first_base if first_is_newer else second_base
-        else:
-            # Only has one, choose the one that it does have
-            base = bases[0] if has_first_base else bases[1]
-        tracker.finish_rebase(child, base)
-    else:
-        base = bases[0]
-
+    base = tracker.base_for_branch(child)
     parent_rev = hash_for(parent)
+    if base == parent_rev:
+        return
 
     tracker.start_rebase(child, parent_rev)
     git("rebase --onto {} {} {}".format(parent, base, child))

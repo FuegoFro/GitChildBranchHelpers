@@ -31,9 +31,9 @@ except ImportError:
 
 def git(command):
     # type: (Text) -> Text
-    ret = run_command_expecting_failure(subprocess.check_output, "git", command).decode()
+    ret = run_command_expecting_failure(subprocess.check_output, "git", command)
     if sys.version_info[0] >= 3:
-        return cast(Text, ret)
+        return cast(Text, ret.decode())
     else:
         return ret
 
@@ -68,9 +68,8 @@ def does_branch_contain_commit(branch, commit):
 
 def fail_if_not_rebased(current_branch, parent, tracker):
     # type: (Text, Text, BranchTracker) -> None
-    bases = tracker.bases_for_branch(current_branch)
-    assert len(bases) in (1, 2)
-    if len(bases) == 2 or not does_branch_contain_commit(parent, bases[0]):
+    base = tracker.base_for_branch(current_branch)
+    if not does_branch_contain_commit(parent, base):
         print("Please rebase this branch on top of its parent")
         exit()
 
@@ -252,9 +251,34 @@ class BranchTracker(object):
         # type: (Text) -> List[Text]
         return self._parent_to_children[parent]
 
-    def bases_for_branch(self, branch):
-        # type: (Text) -> Tuple[Text,...]
-        return self._branch_to_bases[branch]
+    def base_for_branch(self, branch):
+        # type: (Text) -> Text
+        bases = self._branch_to_bases[branch]
+        if len(bases) == 1:
+            # If we have one base, just return that.
+            return bases[0]
+        elif len(bases) == 2:
+            # If we started a rebase, figure out what state we're currently in and and return
+            # the actual base accordingly.
+            first_base, second_base = bases
+            has_first_base = does_branch_contain_commit(branch, first_base)
+            has_second_base = does_branch_contain_commit(branch, second_base)
+            # Should have at least one of the two bases
+            assert has_first_base or has_second_base
+            if has_first_base and has_second_base:
+                # Choose the newer one. The older one will be the merge base of the two
+                older_base = git("merge-base {} {}".format(first_base, second_base))
+                first_is_newer = older_base == second_base
+                base = first_base if first_is_newer else second_base
+            else:
+                # Only has one, choose the one that it does have
+                base = bases[0] if has_first_base else bases[1]
+            self.finish_rebase(branch, base)
+            return base
+        else:
+            raise AssertionError(
+                "Expected to have 1 or 2 bases, actually had {}".format(len(bases))
+            )
 
     def get_all_parents(self):
         # type: () -> Iterable[Text]
