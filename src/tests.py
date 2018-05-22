@@ -13,6 +13,7 @@ from subcommands.git_make_child_branch import make_child_branch
 from subcommands.git_rebase_children import rebase_children
 from subcommands.git_remove_leaf_child import remove_branch
 from subcommands.git_rename_branch import rename_current_branch
+from subcommands.print_branch_info import get_branch_info
 from subcommands.print_child_branch_structure import get_branch_structure_string
 from subcommands.set_branch_archived import set_archived
 
@@ -215,6 +216,21 @@ def _integration_test(target_directory):
         git("checkout second_branch")
         set_archived(False)
         assert get_branch_structure_string(False) == UNARCHIVED_PRINT_STRUCTURE
+
+        current_commit = hash_for("HEAD")
+        assert (
+                get_branch_info(branch=None, use_null_delimiter=False) ==
+                "Parent branch: first_branch; Base revision: {}".format(current_commit)
+        )
+        assert (
+                get_branch_info(branch=None, use_null_delimiter=True) ==
+                "first_branch\0{}".format(current_commit)
+        )
+        try:
+            get_branch_info(branch="master", use_null_delimiter=False)
+            assert False, "Should not get here"
+        except SystemExit as e:
+            assert str(e) == "Branch does not have a parent: master"
 
 
 def main(target_directory):

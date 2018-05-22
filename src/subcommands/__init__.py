@@ -6,6 +6,7 @@ from subcommands.git_make_child_branch import GitMakeChildBranch
 from subcommands.git_rebase_children import GitRebaseOntoParent
 from subcommands.git_remove_leaf_child import GitRemoveLeafBranch
 from subcommands.git_rename_branch import GitRenameBranch
+from subcommands.print_branch_info import PrintBranchInfo
 from subcommands.print_child_branch_structure import PrintChildBranchStructure
 from subcommands.set_branch_archived import SetBranchArchived
 
@@ -21,6 +22,7 @@ _ALL_COMMANDS = (
     GitRemoveLeafBranch(),
     GitRenameBranch(),
     PrintChildBranchStructure(),
+    PrintBranchInfo(),
     SetBranchArchived(),
 )
 
