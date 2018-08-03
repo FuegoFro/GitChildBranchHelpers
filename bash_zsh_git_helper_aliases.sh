@@ -27,4 +27,6 @@ if [ -e "$GIT_CHILD_BRANCH_HELPERS_LOCATION" ]; then
     alias ccp='"$GIT_CHILD_BRANCH_HELPERS_LOCATION" change-parent'
     # Set archived
     alias csa='"$GIT_CHILD_BRANCH_HELPERS_LOCATION" set-archived'
+    # Print branch info
+    alias cbi='"$GIT_CHILD_BRANCH_HELPERS_LOCATION" print-branch-info'
 fi
