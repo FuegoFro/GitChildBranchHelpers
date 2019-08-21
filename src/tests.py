@@ -7,6 +7,7 @@ import glob
 import os
 import shutil
 import subprocess
+import tempfile
 
 from git_helpers import get_current_branch, git, hash_for
 from subcommands.git_make_child_branch import make_child_branch
@@ -18,7 +19,7 @@ from subcommands.print_child_branch_structure import get_branch_structure_string
 from subcommands.set_branch_archived import set_archived
 
 if False:
-    from typing import Iterator, Callable, Text
+    from typing import Iterator, Callable, Text, Optional
 
 SRC_DIR = os.path.realpath(os.path.dirname(__file__))
 
@@ -234,8 +235,11 @@ def _integration_test(target_directory):
 
 
 def main(target_directory):
-    # type: (Text) -> None
+    # type: (Optional[Text]) -> None
     _mypy_check()
+    if target_directory is None:
+        target_directory = tempfile.mkdtemp()
+        os.rmdir(target_directory)
     _integration_test(target_directory)
     print("")
     print("Tests finished successfully!")
@@ -243,6 +247,6 @@ def main(target_directory):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument("test_target_dir")
+    parser.add_argument("--test_target_dir", default=None)
     args = parser.parse_args()
     main(args.test_target_dir)
