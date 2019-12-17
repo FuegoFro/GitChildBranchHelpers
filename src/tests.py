@@ -15,7 +15,7 @@ from subcommands.git_rebase_children import rebase_children
 from subcommands.git_remove_leaf_child import remove_branch
 from subcommands.git_rename_branch import rename_current_branch
 from subcommands.print_branch_info import get_branch_info
-from subcommands.print_child_branch_structure import get_branch_structure_string
+from subcommands.print_child_branch_structure import get_branch_structure_string, make_green
 from subcommands.set_branch_archived import set_archived
 
 if False:
@@ -112,11 +112,11 @@ def _integration_test(target_directory):
         assert get_current_branch() == "third_branch"
 
         # Rename a branch
-        rename_current_branch("third_branch_renamed")
+        rename_current_branch("third_branch_renamed", force=False)
         assert get_current_branch() == "third_branch_renamed"
 
         # Rename it back
-        rename_current_branch("third_branch")
+        rename_current_branch("third_branch", force=False)
         assert get_current_branch() == "third_branch"
 
         # This should be sibling to second_branch, on top of first_branch
@@ -208,15 +208,17 @@ def _integration_test(target_directory):
         rebase_children(True)
         assert current_commit == hash_for("HEAD")
 
-        assert get_branch_structure_string(False) == UNARCHIVED_PRINT_STRUCTURE
+        unarchived_print_structure_sibling_branch = UNARCHIVED_PRINT_STRUCTURE.replace('sibling_branch', make_green('sibling_branch'))
+        archived_print_structure_sibling_branch = ARCHIVED_PRINT_STRUCTURE.replace('sibling_branch', make_green('sibling_branch'))
+        assert get_branch_structure_string(False) == unarchived_print_structure_sibling_branch
 
         set_archived(True, "second_branch")
-        assert get_branch_structure_string(False) == ARCHIVED_PRINT_STRUCTURE
-        assert get_branch_structure_string(True) == UNARCHIVED_PRINT_STRUCTURE
+        assert get_branch_structure_string(False) == archived_print_structure_sibling_branch
+        assert get_branch_structure_string(True) == unarchived_print_structure_sibling_branch
 
         git("checkout second_branch")
         set_archived(False)
-        assert get_branch_structure_string(False) == UNARCHIVED_PRINT_STRUCTURE
+        assert get_branch_structure_string(False) == UNARCHIVED_PRINT_STRUCTURE.replace('second_branch', make_green('second_branch'))
 
         current_commit = hash_for("HEAD")
         assert (

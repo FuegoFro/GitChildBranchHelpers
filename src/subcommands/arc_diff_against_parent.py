@@ -1,9 +1,8 @@
 import argparse
 from argparse import ArgumentParser, Namespace
 
-from git_helpers import arc, fail_if_not_rebased, get_current_branch
+from git_helpers import arc, fail_if_not_rebased, get_current_branch, get_branch_tracker
 from subcommands.base_command import BaseCommand
-from subcommands.git_rebase_children import get_branch_tracker
 
 if False:
     from typing import Text
