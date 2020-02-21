@@ -3,7 +3,10 @@ from __future__ import print_function, unicode_literals
 import sys
 from argparse import ArgumentParser, Namespace
 
-from typing import Text, Optional
+try:
+    from typing import Text, Optional
+except ImportError:
+    pass
 
 from git_helpers import get_current_branch, get_branch_tracker
 from subcommands.base_command import BaseCommand

@@ -25,6 +25,9 @@ try:
         TextIO,
         cast,
     )
+
+    T = TypeVar('T')
+
 except ImportError:
     pass
 
@@ -77,9 +80,6 @@ def fail_if_not_rebased(current_branch, parent, tracker):
 def arc(command):
     # type: (Text) -> None
     run_command_expecting_failure(subprocess.check_call, "arc", command)
-
-
-T = TypeVar('T')
 
 
 def run_command_expecting_failure(command_runner, program, command):

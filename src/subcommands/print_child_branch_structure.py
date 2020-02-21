@@ -16,6 +16,8 @@ try:
         TypeVar,
         Text,
     )
+
+    T = TypeVar('T')
 except ImportError:
     pass
 
@@ -108,9 +110,6 @@ def format_node(current_branch, node):
         return make_green(node)
     else:
         return node
-
-
-T = TypeVar('T')
 
 
 def sorted_look_ahead(iterable):
