@@ -365,7 +365,18 @@ class BranchTracker(object):
         # type: (Text) -> bool
         return self._is_branch_archived[branch]
 
+    def is_branch_tracked(self, branch):
+        # type: (Text) -> bool
+        return branch in self._branch_to_bases.keys()
+
 
 def hash_for(rev):
     # type: (Text) -> Text
     return git("rev-parse --verify {}".format(rev)).strip()
+
+def does_branch_exist(branch_name):
+    # type: (Text) -> bool
+    command = "show-ref --verify --quiet refs/heads/{}".format(branch_name)
+    ret = run_command_expecting_failure(subprocess.call, "git", command)
+
+    return ret == 0

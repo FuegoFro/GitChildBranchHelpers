@@ -9,7 +9,7 @@ import shutil
 import subprocess
 import tempfile
 
-from git_helpers import get_current_branch, git, hash_for
+from git_helpers import get_current_branch, git, hash_for, get_branch_tracker
 from subcommands.git_make_child_branch import make_child_branch
 from subcommands.git_rebase_children import rebase_children
 from subcommands.git_remove_leaf_child import remove_branch
@@ -17,6 +17,8 @@ from subcommands.git_rename_branch import rename_current_branch
 from subcommands.print_branch_info import get_branch_info
 from subcommands.print_child_branch_structure import get_branch_structure_string, make_green
 from subcommands.set_branch_archived import set_archived
+from subcommands.clean_branches import clean_invalid_branches
+from subcommands.delete_archived_branches import delete_archived_branches
 
 if False:
     from typing import Iterator, Callable, Text, Optional
@@ -236,6 +238,118 @@ def _integration_test(target_directory):
             assert str(e) == "Branch does not have a parent: master"
 
 
+
+def _test_clean_branches(target_directory):
+    # type: (Text) -> None
+    target_directory = os.path.expanduser(target_directory)
+    target_container = os.path.dirname(target_directory)
+    assert not os.path.exists(target_directory)
+    assert os.path.isdir(target_container)
+
+    with run_test(target_directory):
+        # Initialize a repo and add a first commit so we can tell what branch we're on.
+        print("Initializing repo")
+        git("init")
+        open("hello.txt", "w").close()
+        git("add .")
+        git("commit -am initial_commit")
+
+        assert get_current_branch() == "master"
+        original_commit = hash_for("HEAD")
+
+        # Create all the branches
+        make_child_branch("valid_branch")
+        assert get_current_branch() == "valid_branch"
+
+        git("checkout master")
+
+        make_child_branch("ghost_branch_childless")
+        assert get_current_branch() == "ghost_branch_childless"
+
+        git("checkout master")
+
+        make_child_branch("ghost_branch_with_children")
+        assert get_current_branch() == "ghost_branch_with_children"
+
+        make_child_branch("child_of_ghost_branch")
+        assert get_current_branch() == "child_of_ghost_branch"
+
+        git("checkout master")
+
+        print("Deleting branches from git")
+        git("branch -D ghost_branch_childless")
+        git("branch -D ghost_branch_with_children")
+
+        print("Test cleaning by archiving")
+        clean_invalid_branches(True)
+
+        with get_branch_tracker() as tracker:
+            assert(tracker.is_archived("valid_branch")==False)
+            assert(tracker.is_archived("ghost_branch_childless")==True)
+            assert(tracker.is_archived("ghost_branch_with_children")==True)
+
+            print("Clear archived flags for next test")
+            tracker.set_is_archived("ghost_branch_childless", False)
+            tracker.set_is_archived("ghost_branch_with_children", False)
+
+        print("Test cleaning by deleting")
+        clean_invalid_branches(False)
+
+        with get_branch_tracker() as tracker:
+            assert(tracker.is_branch_tracked("valid_branch")==True)
+            assert(tracker.is_branch_tracked("ghost_branch_childless")==False)
+            assert(tracker.is_branch_tracked("ghost_branch_with_children")==True)
+
+def _test_delete_archived_branches(target_directory):
+    # type: (Text) -> None
+    target_directory = os.path.expanduser(target_directory)
+    target_container = os.path.dirname(target_directory)
+    assert not os.path.exists(target_directory)
+    assert os.path.isdir(target_container)
+
+    with run_test(target_directory):
+        # Initialize a repo and add a first commit so we can tell what branch we're on.
+        print("Initializing repo")
+        git("init")
+        open("hello.txt", "w").close()
+        git("add .")
+        git("commit -am initial_commit")
+
+        assert get_current_branch() == "master"
+        original_commit = hash_for("HEAD")
+
+        # Create all the branches
+        make_child_branch("first_branch")
+        assert get_current_branch() == "first_branch"
+
+        git("checkout master")
+
+        make_child_branch("second_branch")
+        assert get_current_branch() == "second_branch"
+
+        git("checkout master")
+
+        make_child_branch("second_branch_child_one")
+        assert get_current_branch() == "second_branch_child_one"
+
+        make_child_branch("second_branch_child_two")
+        assert get_current_branch() == "second_branch_child_two"
+
+        git("checkout master")
+
+        with get_branch_tracker() as tracker:
+            tracker.set_is_archived("first_branch", True)
+            tracker.set_is_archived("second_branch_child_two", True)
+
+        # Test
+        delete_archived_branches()
+
+        with get_branch_tracker() as tracker:
+            assert(tracker.is_branch_tracked("first_branch")==False)
+            assert(tracker.is_branch_tracked("second_branch")==True)
+            assert(tracker.is_branch_tracked("second_branch_child_one")==True)
+            assert(tracker.is_branch_tracked("second_branch_child_two")==False)
+
 def main(target_directory):
     # type: (Optional[Text]) -> None
     _mypy_check()
@@ -243,6 +357,8 @@ def main(target_directory):
         target_directory = tempfile.mkdtemp()
         os.rmdir(target_directory)
     _integration_test(target_directory)
+    _test_clean_branches(target_directory)
+    _test_delete_archived_branches(target_directory)
     print("")
     print("Tests finished successfully!")
 
