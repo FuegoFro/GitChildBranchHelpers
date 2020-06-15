@@ -50,6 +50,11 @@ master
 @contextlib.contextmanager
 def run_test(path):
     # type: (Text) -> Iterator[None]
+    path = os.path.expanduser(path)
+    target_container = os.path.dirname(path)
+    assert not os.path.exists(path)
+    assert os.path.isdir(target_container)
+
     os.mkdir(path)
     starting_directory = os.getcwd()
     try:
@@ -85,22 +90,24 @@ def _mypy_check():
             exit(1)
 
 
+def _initialize_repo():
+    # type: () -> None
+    """
+        Initialize a repo and add a first commit so we can tell what branch we're on.
+    """
+    print("Initializing repo")
+    git("init")
+    open("hello.txt", "w").close()
+    git("add .")
+    git("commit -am initial_commit")
+
+    assert get_current_branch() == "master"
+
+
 def _integration_test(target_directory):
     # type: (Text) -> None
-    target_directory = os.path.expanduser(target_directory)
-    target_container = os.path.dirname(target_directory)
-    assert not os.path.exists(target_directory)
-    assert os.path.isdir(target_container)
-
     with run_test(target_directory):
-        # Initialize a repo and add a first commit so we can tell what branch we're on.
-        print("Initializing repo")
-        git("init")
-        open("hello.txt", "w").close()
-        git("add .")
-        git("commit -am initial_commit")
-
-        assert get_current_branch() == "master"
+        _initialize_repo()
         original_commit = hash_for("HEAD")
 
         # Create all the branches
@@ -238,24 +245,10 @@ def _integration_test(target_directory):
             assert str(e) == "Branch does not have a parent: master"
 
 
-
 def _test_clean_branches(target_directory):
     # type: (Text) -> None
-    target_directory = os.path.expanduser(target_directory)
-    target_container = os.path.dirname(target_directory)
-    assert not os.path.exists(target_directory)
-    assert os.path.isdir(target_container)
-
     with run_test(target_directory):
-        # Initialize a repo and add a first commit so we can tell what branch we're on.
-        print("Initializing repo")
-        git("init")
-        open("hello.txt", "w").close()
-        git("add .")
-        git("commit -am initial_commit")
-
-        assert get_current_branch() == "master"
-        original_commit = hash_for("HEAD")
+        _initialize_repo()
 
         # Create all the branches
         make_child_branch("valid_branch")
@@ -300,23 +293,11 @@ def _test_clean_branches(target_directory):
             assert(tracker.is_branch_tracked("ghost_branch_childless")==False)
             assert(tracker.is_branch_tracked("ghost_branch_with_children")==True)
 
+
 def _test_delete_archived_branches(target_directory):
     # type: (Text) -> None
-    target_directory = os.path.expanduser(target_directory)
-    target_container = os.path.dirname(target_directory)
-    assert not os.path.exists(target_directory)
-    assert os.path.isdir(target_container)
-
     with run_test(target_directory):
-        # Initialize a repo and add a first commit so we can tell what branch we're on.
-        print("Initializing repo")
-        git("init")
-        open("hello.txt", "w").close()
-        git("add .")
-        git("commit -am initial_commit")
-
-        assert get_current_branch() == "master"
-        original_commit = hash_for("HEAD")
+        _initialize_repo()
 
         # Create all the branches
         make_child_branch("first_branch")
@@ -326,8 +307,6 @@ def _test_delete_archived_branches(target_directory):
 
         make_child_branch("second_branch")
         assert get_current_branch() == "second_branch"
-
-        git("checkout master")
 
         make_child_branch("second_branch_child_one")
         assert get_current_branch() == "second_branch_child_one"
@@ -355,6 +334,7 @@ def main(target_directory):
     _mypy_check()
     if target_directory is None:
         target_directory = tempfile.mkdtemp()
+        assert target_directory is not None
         os.rmdir(target_directory)
     _integration_test(target_directory)
     _test_clean_branches(target_directory)

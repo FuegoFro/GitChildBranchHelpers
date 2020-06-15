@@ -1,4 +1,3 @@
-# coding=utf-8
 from __future__ import print_function, unicode_literals
 
 import os
@@ -45,37 +44,23 @@ class CleanBranches(BaseCommand):
 def clean_invalid_branches(archive):
     # type: (bool) -> None
     with get_branch_tracker() as tracker:
-        roots = []
-        for parent in tracker.get_all_parents():
-            if not tracker.has_parent(parent):
-                roots.append(parent)
+        for branch in tracker.list_of_branches():
+            if _is_branch_invalid(tracker, branch):
+                if archive:
+                    _archive_invalid_branch(tracker, branch)
+                else:
+                    _delete_invalid_branch_if_possible(tracker, branch)
 
-        roots = sorted(roots)
-
-        for root in roots:
-            clean_invalid_branches_internal(tracker, root, archive)
-
-def clean_invalid_branches_internal(tracker, branch_name, archive):
-    # type: (BranchTracker, Text, bool) -> None
-    for child in tracker.children_for_parent(branch_name):
-        clean_invalid_branches_internal(tracker, child, archive)
-
-    if is_branch_invalid(tracker, branch_name):
-        if archive:
-            archive_invalid_branch(tracker, branch_name)
-        else:
-            delete_invalid_branch_if_possible(tracker, branch_name)
-
-def is_branch_invalid(tracker, branch_name):
+def _is_branch_invalid(tracker, branch_name):
     # type: (BranchTracker, Text) -> bool
     return not does_branch_exist(branch_name) and not tracker.is_archived(branch_name)
 
-def archive_invalid_branch(tracker, branch_name):
+def _archive_invalid_branch(tracker, branch_name):
     # type: (BranchTracker, Text) -> None
     print("Archiving invalid branch {}".format(branch_name))
     tracker.set_is_archived(branch_name, True)
 
-def delete_invalid_branch_if_possible(tracker, branch_name):
+def _delete_invalid_branch_if_possible(tracker, branch_name):
     # type: (BranchTracker, Text) -> None
     children = tracker.children_for_parent(branch_name)
     if tracker.children_for_parent(branch_name):

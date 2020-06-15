@@ -311,6 +311,33 @@ class BranchTracker(object):
         self._branch_to_bases[new_child] = (child_base, )
         self._is_branch_archived[new_child] = False
 
+    def list_of_branches(self):
+        # type: () -> List[Text]
+        """
+            Returns a topologically sorted list of all known branches where
+            the children will always come before their parents.
+        """
+        roots = []
+        for parent in self.get_all_parents():
+            if not self.has_parent(parent):
+                roots.append(parent)
+
+        roots = sorted(roots)
+
+        def inner_linear_order(branch_name, return_list):
+            # type: (Text, List[Text]) -> None
+            for child in self.children_for_parent(branch_name):
+                inner_linear_order(child, return_list)
+
+            return_list.append(branch_name)
+
+        return_list = [] # type: List[Text]
+
+        for root in roots:
+            inner_linear_order(root, return_list)
+
+        return return_list
+
     def start_rebase(self, branch, new_base):
         # type: (Text, Text) -> None
         bases = self._branch_to_bases[branch]
@@ -367,7 +394,7 @@ class BranchTracker(object):
 
     def is_branch_tracked(self, branch):
         # type: (Text) -> bool
-        return branch in self._branch_to_bases.keys()
+        return branch in self._branch_to_bases
 
 
 def hash_for(rev):
@@ -378,5 +405,5 @@ def does_branch_exist(branch_name):
     # type: (Text) -> bool
     command = "show-ref --verify --quiet refs/heads/{}".format(branch_name)
     ret = run_command_expecting_failure(subprocess.call, "git", command)
-
+    
     return ret == 0
