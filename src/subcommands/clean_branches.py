@@ -41,6 +41,7 @@ class CleanBranches(BaseCommand):
         # type: (Namespace) -> None
         clean_invalid_branches(args.archive)
 
+
 def clean_invalid_branches(archive):
     # type: (bool) -> None
     with get_branch_tracker() as tracker:
@@ -51,14 +52,17 @@ def clean_invalid_branches(archive):
                 else:
                     _delete_invalid_branch_if_possible(tracker, branch)
 
+
 def _is_branch_invalid(tracker, branch_name):
     # type: (BranchTracker, Text) -> bool
     return not does_branch_exist(branch_name) and not tracker.is_archived(branch_name)
+
 
 def _archive_invalid_branch(tracker, branch_name):
     # type: (BranchTracker, Text) -> None
     print("Archiving invalid branch {}".format(branch_name))
     tracker.set_is_archived(branch_name, True)
+
 
 def _delete_invalid_branch_if_possible(tracker, branch_name):
     # type: (BranchTracker, Text) -> None
