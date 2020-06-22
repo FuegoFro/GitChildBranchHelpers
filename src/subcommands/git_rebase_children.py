@@ -64,7 +64,7 @@ def do_rebase(tracker, parent, child, extra_args):
     tracker.finish_rebase(child, parent_rev)
 
 
-def rebase_children(is_recursive, extra_git_rebase_args=tuple()):
+def rebase_children(is_recursive, extra_git_rebase_args=()):
     # type: (bool, Sequence[Text]) -> None
     current_branch = get_current_branch()
     if extra_git_rebase_args:

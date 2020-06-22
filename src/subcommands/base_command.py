@@ -1,15 +1,13 @@
-from abc import ABCMeta, abstractmethod
+from abc import abstractmethod
 from argparse import ArgumentParser, Namespace
 
-from type_utils import MYPY
+from type_utils import ABC, MYPY
 
 if MYPY:
     from typing import Text
 
 
-class BaseCommand(object):
-    __metaclass__ = ABCMeta
-
+class BaseCommand(ABC):
     @abstractmethod
     def get_name(self):
         # type: () -> Text
