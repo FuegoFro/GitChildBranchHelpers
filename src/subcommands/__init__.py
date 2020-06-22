@@ -1,6 +1,10 @@
+from __future__ import unicode_literals
+
 from subcommands.arc_diff_against_parent import ArcDiffAgainstParent
 from subcommands.arc_land_onto_parent import ArcLandOntoParent
 from subcommands.base_command import BaseCommand as _BaseCommand
+from subcommands.clean_branches import CleanBranches
+from subcommands.delete_archived_branches import DeleteArchivedBranches
 from subcommands.git_change_parent import GitChangeParent
 from subcommands.git_make_child_branch import GitMakeChildBranch
 from subcommands.git_rebase_children import GitRebaseOntoParent
@@ -9,8 +13,6 @@ from subcommands.git_rename_branch import GitRenameBranch
 from subcommands.print_branch_info import PrintBranchInfo
 from subcommands.print_child_branch_structure import PrintChildBranchStructure
 from subcommands.set_branch_archived import SetBranchArchived
-from subcommands.clean_branches import CleanBranches
-from subcommands.delete_archived_branches import DeleteArchivedBranches
 from type_utils import MYPY
 
 if MYPY:
@@ -28,7 +30,7 @@ _ALL_COMMANDS = (
     PrintBranchInfo(),
     SetBranchArchived(),
     CleanBranches(),
-    DeleteArchivedBranches()
+    DeleteArchivedBranches(),
 )
 
 

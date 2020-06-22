@@ -13,11 +13,11 @@ if MYPY:
 class DeleteArchivedBranches(BaseCommand):
     def get_name(self):
         # type: () -> Text
-        return 'delete-archived'
+        return "delete-archived"
 
     def get_short_description(self):
         # type: () -> Text
-        return 'deletes all archived branches'
+        return "deletes all archived branches"
 
     def inflate_subcommand_parser(self, parser):
         # type: (ArgumentParser) -> None

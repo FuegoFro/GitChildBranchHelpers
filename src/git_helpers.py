@@ -8,28 +8,12 @@ import subprocess
 import sys
 from collections import defaultdict, deque
 
-try:
-    # noinspection PyUnresolvedReferences
-    from typing import (
-        Any,
-        BinaryIO,
-        Callable,
-        Dict,
-        Iterable,
-        List,
-        Optional,
-        Tuple,
-        TypeVar,
-        Union,
-        Text,
-        TextIO,
-        cast,
-    )
+from type_utils import MYPY
 
-    T = TypeVar('T')
+if MYPY:
+    from typing import Any, BinaryIO, Callable, Dict, Iterable, List, Text, Tuple, TypeVar
 
-except ImportError:
-    pass
+    T = TypeVar("T")
 
 
 def git(command):
@@ -156,7 +140,7 @@ class BranchTracker(object):
                 if rebase_base:
                     self._branch_to_bases[child] = (base, rebase_base)
                 else:
-                    self._branch_to_bases[child] = (base, )
+                    self._branch_to_bases[child] = (base,)
 
     def _run_migrations(self, f):
         # type: (BinaryIO) -> int
@@ -184,8 +168,9 @@ class BranchTracker(object):
 
             # Now re-seek the input file to the right place
             f.seek(0)
-            assert self._get_version_from_file(f) == target_version, \
-                "Migrations did not leave database at target version"
+            assert (
+                self._get_version_from_file(f) == target_version
+            ), "Migrations did not leave database at target version"
 
         # Return the new version number
         return target_version
@@ -216,15 +201,13 @@ class BranchTracker(object):
             # file.
             migrated_file_contents = ["version,1\n"]
             # Add the archived field to each entry, defaulting to False.
-            with open(config_file, 'r') as f:
+            with open(config_file, "r") as f:
                 for line in f:
                     migrated_file_contents += [line.rstrip() + ",False\n"]
-            with open(config_file, 'wb') as f_out:
+            with open(config_file, "wb") as f_out:
                 f_out.write("".join(migrated_file_contents).encode())
 
-        return (
-            m001_add_archived_field,
-        )
+        return (m001_add_archived_field,)
 
     def save_to_file(self):
         # type: () -> None
@@ -276,9 +259,7 @@ class BranchTracker(object):
             self.finish_rebase(branch, base)
             return base
         else:
-            raise AssertionError(
-                "Expected to have 1 or 2 bases, actually had {}".format(len(bases))
-            )
+            raise AssertionError("Expected to have 1 or 2 bases, actually had {}".format(len(bases)))
 
     def get_all_parents(self):
         # type: () -> Iterable[Text]
@@ -308,7 +289,7 @@ class BranchTracker(object):
         # type: (Text, Text, Text) -> None
         self._child_to_parent[new_child] = parent
         self._parent_to_children[parent].append(new_child)
-        self._branch_to_bases[new_child] = (child_base, )
+        self._branch_to_bases[new_child] = (child_base,)
         self._is_branch_archived[new_child] = False
 
     def linearized_branches(self):
@@ -336,13 +317,13 @@ class BranchTracker(object):
         # type: (Text, Text) -> None
         bases = self._branch_to_bases[branch]
         assert len(bases) == 1
-        self._branch_to_bases[branch] = bases + (new_base, )
+        self._branch_to_bases[branch] = bases + (new_base,)
 
     def finish_rebase(self, branch, new_base):
         # type: (Text, Text) -> None
         bases = self._branch_to_bases[branch]
         assert len(bases) == 2
-        self._branch_to_bases[branch] = (new_base, )
+        self._branch_to_bases[branch] = (new_base,)
 
     def rename_branch(self, old_branch, new_branch):
         # type: (Text, Text) -> None
@@ -362,8 +343,7 @@ class BranchTracker(object):
     def remove_child_leaf(self, child_leaf):
         # type: (Text) -> None
         children = self._parent_to_children[child_leaf]
-        assert not children, "Expected branch to be a leaf node, had {} child(ren).".format(
-            len(children))
+        assert not children, "Expected branch to be a leaf node, had {} child(ren).".format(len(children))
 
         if child_leaf in self._child_to_parent:
             parent = self._child_to_parent.pop(child_leaf)

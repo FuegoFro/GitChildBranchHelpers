@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import argparse
 
 from subcommands import get_commands
@@ -8,14 +10,11 @@ def main():
     # type: () -> None
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(
-        title='actions',
-        description='valid actions',
-        help='run <action> -h for more details',
+        title="actions", description="valid actions", help="run <action> -h for more details"
     )
 
     for command in get_commands():
-        command_parser = subparsers.add_parser(
-            command.get_name(), help=command.get_short_description())
+        command_parser = subparsers.add_parser(command.get_name(), help=command.get_short_description())
         command.inflate_subcommand_parser(command_parser)
         command_parser.set_defaults(command_obj=command)
 
@@ -25,5 +24,5 @@ def main():
     command_obj.run_command(args)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

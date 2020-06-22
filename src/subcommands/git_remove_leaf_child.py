@@ -1,4 +1,4 @@
-from __future__ import print_function
+from __future__ import print_function, unicode_literals
 
 from argparse import ArgumentParser, Namespace
 
@@ -13,19 +13,19 @@ if MYPY:
 class GitRemoveLeafBranch(BaseCommand):
     def get_name(self):
         # type: () -> Text
-        return 'remove-branch'
+        return "remove-branch"
 
     def get_short_description(self):
         # type: () -> Text
-        return 'deletes the current branch, if it is merged into its parent'
+        return "deletes the current branch, if it is merged into its parent"
 
     def inflate_subcommand_parser(self, parser):
         # type: (ArgumentParser) -> None
         parser.add_argument(
-            "-f", "--force",
+            "-f",
+            "--force",
             action="store_true",
-            help='forces the current branch to be removed even if it has not been merged into its '
-                 'parent',
+            help="forces the current branch to be removed even if it has not been merged into its parent",
         )
 
     def run_command(self, args):
@@ -40,23 +40,17 @@ def remove_branch(force_remove):
     with get_branch_tracker() as tracker:
         parent = tracker.parent_for_child(current_branch)
         children = tracker.children_for_parent(current_branch)
-        assert not children, \
-            "Child branch should not have any children, found {} child(ren)".format(len(children))
+        assert not children, "Child branch should not have any children, found {} child(ren)".format(len(children))
 
-        merged_into_parent = [
-            line[2:] for line in git("branch --merged {}".format(parent)).split('\n') if line
-        ]
+        merged_into_parent = [line[2:] for line in git("branch --merged {}".format(parent)).split("\n") if line]
         if current_branch in merged_into_parent:
-            print("Removing merged branch {!r} (was at commit {})".format(
-                current_branch, current_commit))
+            print("Removing merged branch {!r} (was at commit {})".format(current_branch, current_commit))
         elif force_remove:
-            print("Force removing unmerged branch {!r} (was at commit {})".format(
-                current_branch, current_commit, ))
+            print("Force removing unmerged branch {!r} (was at commit {})".format(current_branch, current_commit))
         else:
             print("")
             print("!!!!!!!!")
-            print("!!! Trying to remove branch {!r} not merged into its parent. Re-run with" \
-                  "".format(current_branch))
+            print("!!! Trying to remove branch {!r} not merged into its parent. Re-run with".format(current_branch))
             print("!!! '--force' if you want to force the deletion of this branch.")
             print("!!!")
             print("!!! WARNING: Running with '--force' may cause data loss")

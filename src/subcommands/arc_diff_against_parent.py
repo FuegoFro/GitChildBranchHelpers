@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import argparse
 from argparse import ArgumentParser, Namespace
 
@@ -12,19 +14,21 @@ if MYPY:
 class ArcDiffAgainstParent(BaseCommand):
     def get_name(self):
         # type: () -> Text
-        return 'arc-diff'
+        return "arc-diff"
 
     def get_short_description(self):
         # type: () -> Text
-        return '`arc diff` this branch against its parent branch'
+        return "`arc diff` this branch against its parent branch"
 
     def inflate_subcommand_parser(self, parser):
         # type: (ArgumentParser) -> None
         parser.add_argument(
-            'arc_diff_args',
+            "arc_diff_args",
             nargs=argparse.REMAINDER,
-            help="arguments to pass through to `arc diff`. You may need to add '--' before "
-                 "them if the the first arg to pass through starts with '-'.",
+            help=(
+                "arguments to pass through to `arc diff`. You may need to add '--' before "
+                "them if the the first arg to pass through starts with '-'."
+            ),
         )
 
     def run_command(self, args):

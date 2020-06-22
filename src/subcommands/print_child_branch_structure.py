@@ -5,35 +5,30 @@ import os
 import sys
 from argparse import ArgumentParser, Namespace
 
+from git_helpers import BranchTracker, get_branch_tracker, get_current_branch
 from subcommands.base_command import BaseCommand
 from type_utils import MYPY
-from git_helpers import get_branch_tracker, get_current_branch, BranchTracker
 
 if MYPY:
-    from typing import (
-        Iterable,
-        List,
-        Tuple,
-        TypeVar,
-        Text,
-    )
+    from typing import Iterable, List, Text, Tuple, TypeVar
 
-    T = TypeVar('T')
+    T = TypeVar("T")
 
 
 class PrintChildBranchStructure(BaseCommand):
     def get_name(self):
         # type: () -> Text
-        return 'print-structure'
+        return "print-structure"
 
     def get_short_description(self):
         # type: () -> Text
-        return 'prints the dependency structure of the branches'
+        return "prints the dependency structure of the branches"
 
     def inflate_subcommand_parser(self, parser):
         # type: (ArgumentParser) -> None
-        parser.add_argument("-a", "--all", action="store_true",
-                            help="set to show all branches, including archived branches")
+        parser.add_argument(
+            "-a", "--all", action="store_true", help="set to show all branches, including archived branches"
+        )
 
     def run_command(self, args):
         # type: (Namespace) -> None
@@ -47,10 +42,9 @@ def output_supports_color():
     otherwise. Taken from django.core.management.color.supports_color
     """
     plat = sys.platform
-    supported_platform = plat != 'Pocket PC' and (plat != 'win32' or
-                                                  'ANSICON' in os.environ)
+    supported_platform = plat != "Pocket PC" and (plat != "win32" or "ANSICON" in os.environ)
     # isatty is not always implemented, #6223.
-    is_a_tty = hasattr(sys.stdout, 'isatty') and sys.stdout.isatty()
+    is_a_tty = hasattr(sys.stdout, "isatty") and sys.stdout.isatty()
     return supported_platform and is_a_tty
 
 
@@ -76,7 +70,8 @@ def get_branch_structure_string(show_all):
         roots = sorted(roots)
 
         skipped_archived = _get_branch_structure_parts_internal(
-            tracker, current_branch, roots, structure_parts, show_all)
+            tracker, current_branch, roots, structure_parts, show_all
+        )
 
         if skipped_archived:
             structure_parts.append("(not displaying archived branches, run with --all to see them)")
@@ -93,8 +88,7 @@ def _get_branch_structure_parts_internal(tracker, current_branch, roots, structu
             structure_parts.append("")
         first = False
         structure_parts.append(format_node(current_branch, root))
-        child_skipped_archived = _add_tree_parts(
-            tracker, current_branch, root, structure_parts, "", show_all)
+        child_skipped_archived = _add_tree_parts(tracker, current_branch, root, structure_parts, "", show_all)
         # NOTE: Don't inline this 'or' because it will cause the recursive call not to happen due
         # to short circuiting.
         skipped_archived = skipped_archived or child_skipped_archived
@@ -144,7 +138,8 @@ def _add_tree_parts(tracker, current_branch, node, parts, indent_characters, sho
         parts.append(indent_characters + prefix + format_node(current_branch, child))
 
         child_skipped_archived = _add_tree_parts(
-            tracker, current_branch, child, parts, indent_characters + child_indent, show_all)
+            tracker, current_branch, child, parts, indent_characters + child_indent, show_all
+        )
         # NOTE: Don't inline this 'or' because it will cause the recursive call not to happen due
         # to short circuiting.
         skipped_archived = skipped_archived or child_skipped_archived

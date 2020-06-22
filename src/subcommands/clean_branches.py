@@ -13,16 +13,17 @@ if MYPY:
 class CleanBranches(BaseCommand):
     def get_name(self):
         # type: () -> Text
-        return 'clean-branches'
+        return "clean-branches"
 
     def get_short_description(self):
         # type: () -> Text
-        return 'deletes branches that are no longer known to git'
+        return "deletes branches that are no longer known to git"
 
     def inflate_subcommand_parser(self, parser):
         # type: (ArgumentParser) -> None
-        parser.add_argument("-a", "--archive", action="store_true",
-                            help="set to archive instead of delete invalid branches")
+        parser.add_argument(
+            "-a", "--archive", action="store_true", help="set to archive instead of delete invalid branches"
+        )
 
     def run_command(self, args):
         # type: (Namespace) -> None

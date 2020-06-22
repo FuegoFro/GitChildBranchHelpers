@@ -1,4 +1,4 @@
-from __future__ import print_function
+from __future__ import print_function, unicode_literals
 
 from argparse import ArgumentParser, Namespace
 
@@ -13,11 +13,11 @@ if MYPY:
 class GitChangeParent(BaseCommand):
     def get_name(self):
         # type: () -> Text
-        return 'change-parent'
+        return "change-parent"
 
     def get_short_description(self):
         # type: () -> Text
-        return 'change the parent branch of the currently checked out branch'
+        return "change the parent branch of the currently checked out branch"
 
     def inflate_subcommand_parser(self, parser):
         # type: (ArgumentParser) -> None
@@ -29,5 +29,4 @@ class GitChangeParent(BaseCommand):
         current_branch = get_current_branch()
         with get_branch_tracker() as tracker:
             tracker.set_parent(current_branch, new_parent)
-        print("You may want to rebase on top of the new parent to make sure its changes are "
-              "visible in this branch.")
+        print("You may want to rebase on top of the new parent to make sure its changes are " "visible in this branch.")

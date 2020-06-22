@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 from argparse import ArgumentParser, Namespace
 
 from git_helpers import get_branch_tracker, get_current_branch
@@ -11,7 +13,7 @@ if MYPY:
 class SetBranchArchived(BaseCommand):
     def get_name(self):
         # type: () -> Text
-        return 'set-archived'
+        return "set-archived"
 
     def get_short_description(self):
         # type: () -> Text
@@ -19,11 +21,14 @@ class SetBranchArchived(BaseCommand):
 
     def inflate_subcommand_parser(self, parser):
         # type: (ArgumentParser) -> None
-        parser.add_argument("-u", "--unarchive", action="store_true",
-                            help="if set, un-archive the given branch; otherwise, archive it")
-        parser.add_argument("branch_to_set_archive_property", nargs="?",
-                            help='which branch to operate on. If not supplied, operates on the '
-                                 'current branch.')
+        parser.add_argument(
+            "-u", "--unarchive", action="store_true", help="if set, un-archive the given branch; otherwise, archive it"
+        )
+        parser.add_argument(
+            "branch_to_set_archive_property",
+            nargs="?",
+            help="which branch to operate on. If not supplied, operates on the current branch.",
+        )
 
     def run_command(self, args):
         # type: (Namespace) -> None

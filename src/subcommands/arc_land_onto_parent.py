@@ -1,4 +1,4 @@
-from __future__ import print_function
+from __future__ import print_function, unicode_literals
 
 import argparse
 import sys
@@ -15,19 +15,21 @@ if MYPY:
 class ArcLandOntoParent(BaseCommand):
     def get_name(self):
         # type: () -> Text
-        return 'arc-land'
+        return "arc-land"
 
     def get_short_description(self):
         # type: () -> Text
-        return '`arc land` this branch onto its parent branch'
+        return "`arc land` this branch onto its parent branch"
 
     def inflate_subcommand_parser(self, parser):
         # type: (ArgumentParser) -> None
         parser.add_argument(
-            'arc_land_args',
+            "arc_land_args",
             nargs=argparse.REMAINDER,
-            help="arguments to pass through to `arc land`. You may need to add '--' before "
-                 "them if the the first arg to pass through starts with '-'.",
+            help=(
+                "arguments to pass through to `arc land`. You may need to add '--' before "
+                "them if the the first arg to pass through starts with '-'."
+            ),
         )
 
     def run_command(self, args):
@@ -52,8 +54,9 @@ class ArcLandOntoParent(BaseCommand):
                     input_func = input
                 else:
                     input_func = raw_input
-                should_land = input_func("Are you sure you want to land onto non-master branch "
-                                         "'{}'? [y/N] ".format(parent))
+                should_land = input_func(
+                    "Are you sure you want to land onto non-master branch '{}'? [y/N] ".format(parent)
+                )
                 should_land = should_land.lower()
                 if should_land not in ("y", "yes"):
                     print("Aborting land")

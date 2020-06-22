@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 from argparse import ArgumentParser, Namespace
 
 from git_helpers import get_branch_tracker, get_current_branch, git, hash_for
@@ -11,20 +13,23 @@ if MYPY:
 class GitMakeChildBranch(BaseCommand):
     def get_name(self):
         # type: () -> Text
-        return 'make-branch'
+        return "make-branch"
 
     def get_short_description(self):
         # type: () -> Text
-        return 'creates a new branch at the current commit with the current branch as its parent'
+        return "creates a new branch at the current commit with the current branch as its parent"
 
     def inflate_subcommand_parser(self, parser):
         # type: (ArgumentParser) -> None
-        parser.add_argument("new_branch_name", help='the name of the new child branch to create')
+        parser.add_argument("new_branch_name", help="the name of the new child branch to create")
         parser.add_argument(
-            "--revision", "-r",
+            "--revision",
+            "-r",
             required=False,
-            help='the revision that the new branch will point at. If not supplied, it will point '
-                 'at the current commit.',
+            help=(
+                "the revision that the new branch will point at. If not supplied, it will point "
+                "at the current commit."
+            ),
         )
 
     def run_command(self, args):

@@ -3,31 +3,36 @@ from __future__ import print_function, unicode_literals
 import sys
 from argparse import ArgumentParser, Namespace
 
-from type_utils import MYPY
-from git_helpers import get_current_branch, get_branch_tracker
+from git_helpers import get_branch_tracker, get_current_branch
 from subcommands.base_command import BaseCommand
+from type_utils import MYPY
 
 if MYPY:
-    from typing import Text, Optional
+    from typing import Optional, Text
 
 
 class PrintBranchInfo(BaseCommand):
     def get_name(self):
         # type: () -> Text
-        return 'print-branch-info'
+        return "print-branch-info"
 
     def get_short_description(self):
         # type: () -> Text
-        return 'prints parent name and base revision of a single branch'
+        return "prints parent name and base revision of a single branch"
 
     def inflate_subcommand_parser(self, parser):
         # type: (ArgumentParser) -> None
-        parser.add_argument("-z", action="store_true",
-                            help="use null byte delimiters between fields and skip field names. "
-                                 "Output becomes '<parent_branch_name>\\0<base_revision>\\n'")
-        parser.add_argument("branch", nargs='?',
-                            help="which branch to print information for; defaults to current "
-                                 "branch")
+        parser.add_argument(
+            "-z",
+            action="store_true",
+            help=(
+                "use null byte delimiters between fields and skip field names. "
+                "Output becomes '<parent_branch_name>\\0<base_revision>\\n'"
+            ),
+        )
+        parser.add_argument(
+            "branch", nargs="?", help="which branch to print information for; defaults to current branch"
+        )
 
     def run_command(self, args):
         # type: (Namespace) -> None

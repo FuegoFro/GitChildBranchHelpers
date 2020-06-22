@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import argparse
 import subprocess
 from argparse import ArgumentParser, Namespace
@@ -8,35 +10,39 @@ from git_helpers import (
     get_current_branch,
     git,
     hash_for,
-    run_command_expecting_failure)
+    run_command_expecting_failure,
+)
 from subcommands.base_command import BaseCommand
 from type_utils import MYPY
 
 if MYPY:
-    from typing import Text, Sequence
+    from typing import Sequence, Text
 
 
 class GitRebaseOntoParent(BaseCommand):
     def get_name(self):
         # type: () -> Text
-        return 'rebase'
+        return "rebase"
 
     def get_short_description(self):
         # type: () -> Text
-        return 'rebase the current branch onto its parent'
+        return "rebase the current branch onto its parent"
 
     def inflate_subcommand_parser(self, parser):
         # type: (ArgumentParser) -> None
         parser.add_argument(
-            "-r", "--recursive",
+            "-r",
+            "--recursive",
             action="store_true",
             help="if set, will recursively rebase all sub-branches onto their parents",
         )
         parser.add_argument(
-            'git_rebase_args',
+            "git_rebase_args",
             nargs=argparse.REMAINDER,
-            help="arguments to pass through to `git rebase`. You may need to add '--' before "
-                 "them if the the first arg to pass through starts with '-'.",
+            help=(
+                "arguments to pass through to `git rebase`. You may need to add '--' before "
+                "them if the the first arg to pass through starts with '-'."
+            ),
         )
 
     def run_command(self, args):
