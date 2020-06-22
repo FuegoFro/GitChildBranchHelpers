@@ -9,6 +9,8 @@ from subcommands.git_rename_branch import GitRenameBranch
 from subcommands.print_branch_info import PrintBranchInfo
 from subcommands.print_child_branch_structure import PrintChildBranchStructure
 from subcommands.set_branch_archived import SetBranchArchived
+from subcommands.clean_branches import CleanBranches
+from subcommands.delete_archived_branches import DeleteArchivedBranches
 
 if False:
     from typing import Sequence, Set, Text
@@ -24,6 +26,8 @@ _ALL_COMMANDS = (
     PrintChildBranchStructure(),
     PrintBranchInfo(),
     SetBranchArchived(),
+    CleanBranches(),
+    DeleteArchivedBranches()
 )
 
 

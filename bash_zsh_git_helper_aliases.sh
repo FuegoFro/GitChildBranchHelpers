@@ -29,4 +29,8 @@ if [ -e "$GIT_CHILD_BRANCH_HELPERS_LOCATION" ]; then
     alias csa='"$GIT_CHILD_BRANCH_HELPERS_LOCATION" set-archived'
     # Print branch info
     alias cbi='"$GIT_CHILD_BRANCH_HELPERS_LOCATION" print-branch-info'
+    # Clean branches
+    alias ccb='"$GIT_CHILD_BRANCH_HELPERS_LOCATION" clean-branches'
+    # Delete archived
+    alias cda='"$GIT_CHILD_BRANCH_HELPERS_LOCATION" delete-archived'
 fi
