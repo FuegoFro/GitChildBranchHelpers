@@ -19,8 +19,9 @@ from subcommands.print_child_branch_structure import get_branch_structure_string
 from subcommands.set_branch_archived import set_archived
 from subcommands.clean_branches import clean_invalid_branches
 from subcommands.delete_archived_branches import delete_archived_branches
+from type_utils import MYPY
 
-if False:
+if MYPY:
     from typing import Iterator, Callable, Text, Optional
 
 SRC_DIR = os.path.realpath(os.path.dirname(__file__))
@@ -277,9 +278,9 @@ def _test_clean_branches(target_directory):
         clean_invalid_branches(True)
 
         with get_branch_tracker() as tracker:
-            assert(tracker.is_archived("valid_branch")==False)
-            assert(tracker.is_archived("ghost_branch_childless")==True)
-            assert(tracker.is_archived("ghost_branch_with_children")==True)
+            assert not tracker.is_archived("valid_branch")
+            assert tracker.is_archived("ghost_branch_childless")
+            assert tracker.is_archived("ghost_branch_with_children")
 
             print("Clear archived flags for next test")
             tracker.set_is_archived("ghost_branch_childless", False)
@@ -289,9 +290,9 @@ def _test_clean_branches(target_directory):
         clean_invalid_branches(False)
 
         with get_branch_tracker() as tracker:
-            assert(tracker.is_branch_tracked("valid_branch")==True)
-            assert(tracker.is_branch_tracked("ghost_branch_childless")==False)
-            assert(tracker.is_branch_tracked("ghost_branch_with_children")==True)
+            assert tracker.is_branch_tracked("valid_branch")
+            assert not tracker.is_branch_tracked("ghost_branch_childless")
+            assert tracker.is_branch_tracked("ghost_branch_with_children")
 
 
 def _test_delete_archived_branches(target_directory):
@@ -324,10 +325,11 @@ def _test_delete_archived_branches(target_directory):
         delete_archived_branches()
 
         with get_branch_tracker() as tracker:
-            assert(tracker.is_branch_tracked("first_branch")==False)
-            assert(tracker.is_branch_tracked("second_branch")==True)
-            assert(tracker.is_branch_tracked("second_branch_child_one")==True)
-            assert(tracker.is_branch_tracked("second_branch_child_two")==False)
+            assert not tracker.is_branch_tracked("first_branch")
+            assert tracker.is_branch_tracked("second_branch")
+            assert tracker.is_branch_tracked("second_branch_child_one")
+            assert not tracker.is_branch_tracked("second_branch_child_two")
+
 
 def main(target_directory):
     # type: (Optional[Text]) -> None

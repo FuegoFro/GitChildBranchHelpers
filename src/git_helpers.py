@@ -6,7 +6,7 @@ import os
 import shutil
 import subprocess
 import sys
-from collections import defaultdict
+from collections import defaultdict, deque
 
 try:
     # noinspection PyUnresolvedReferences
@@ -36,7 +36,7 @@ def git(command):
     # type: (Text) -> Text
     ret = run_command_expecting_failure(subprocess.check_output, "git", command)
     if sys.version_info[0] >= 3:
-        return cast(Text, ret.decode())
+        return ret.decode()
     else:
         return ret
 
@@ -311,32 +311,26 @@ class BranchTracker(object):
         self._branch_to_bases[new_child] = (child_base, )
         self._is_branch_archived[new_child] = False
 
-    def list_of_branches(self):
+    def linearized_branches(self):
         # type: () -> List[Text]
         """
-            Returns a topologically sorted list of all known branches where
-            the children will always come before their parents.
+        Returns a topologically sorted list of all known branches where
+        the children will always come before their parents.
         """
-        roots = []
-        for parent in self.get_all_parents():
-            if not self.has_parent(parent):
-                roots.append(parent)
+        roots = sorted(branch for branch in self.get_all_parents() if not self.has_parent(branch))
+        frontier = deque(roots)
+        visited = set()
+        linearized = []
 
-        roots = sorted(roots)
+        while frontier:
+            branch = frontier.popleft()
+            if branch in visited:
+                continue
+            visited.add(branch)
+            linearized.append(branch)
+            frontier.extend(self.children_for_parent(branch))
 
-        def inner_linear_order(branch_name, return_list):
-            # type: (Text, List[Text]) -> None
-            for child in self.children_for_parent(branch_name):
-                inner_linear_order(child, return_list)
-
-            return_list.append(branch_name)
-
-        return_list = [] # type: List[Text]
-
-        for root in roots:
-            inner_linear_order(root, return_list)
-
-        return return_list
+        return list(reversed(linearized))
 
     def start_rebase(self, branch, new_base):
         # type: (Text, Text) -> None
@@ -401,9 +395,8 @@ def hash_for(rev):
     # type: (Text) -> Text
     return git("rev-parse --verify {}".format(rev)).strip()
 
+
 def does_branch_exist(branch_name):
     # type: (Text) -> bool
-    command = "show-ref --verify --quiet refs/heads/{}".format(branch_name)
-    ret = run_command_expecting_failure(subprocess.call, "git", command)
-    
-    return ret == 0
+    cmd = ["git", "show-ref", "--verify", "--quiet", "refs/heads/{}".format(branch_name)]
+    return subprocess.call(cmd) == 0

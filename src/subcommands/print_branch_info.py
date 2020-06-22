@@ -3,13 +3,12 @@ from __future__ import print_function, unicode_literals
 import sys
 from argparse import ArgumentParser, Namespace
 
-try:
-    from typing import Text, Optional
-except ImportError:
-    pass
-
+from type_utils import MYPY
 from git_helpers import get_current_branch, get_branch_tracker
 from subcommands.base_command import BaseCommand
+
+if MYPY:
+    from typing import Text, Optional
 
 
 class PrintBranchInfo(BaseCommand):

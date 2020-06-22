@@ -1,27 +1,14 @@
 from __future__ import print_function, unicode_literals
 
-import os
-import sys
 from argparse import ArgumentParser, Namespace
 
-from git_helpers import get_branch_tracker, get_current_branch, git, does_branch_exist, hash_for
+from git_helpers import get_branch_tracker
 from subcommands.base_command import BaseCommand
+from type_utils import MYPY
 
-try:
-    # noinspection PyUnresolvedReferences
-    from typing import (
-        Iterable,
-        List,
-        Tuple,
-        TypeVar,
-        Text,
-    )
+if MYPY:
+    from typing import Text
 
-    T = TypeVar('T')
-except ImportError:
-    pass
-
-from git_helpers import get_branch_tracker, get_current_branch, BranchTracker
 
 class DeleteArchivedBranches(BaseCommand):
     def get_name(self):
@@ -44,7 +31,7 @@ class DeleteArchivedBranches(BaseCommand):
 def delete_archived_branches():
     # type: () -> None
     with get_branch_tracker() as tracker:
-        for branch in tracker.list_of_branches():
+        for branch in tracker.linearized_branches():
             if tracker.is_branch_tracked(branch) and tracker.is_archived(branch):
                 if tracker.children_for_parent(branch):
                     print("Skipping deletion of archived branch {} because it has children".format(branch))

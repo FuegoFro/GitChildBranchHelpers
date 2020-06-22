@@ -6,9 +6,10 @@ import sys
 from argparse import ArgumentParser, Namespace
 
 from subcommands.base_command import BaseCommand
+from type_utils import MYPY
+from git_helpers import get_branch_tracker, get_current_branch, BranchTracker
 
-try:
-    # noinspection PyUnresolvedReferences
+if MYPY:
     from typing import (
         Iterable,
         List,
@@ -18,10 +19,6 @@ try:
     )
 
     T = TypeVar('T')
-except ImportError:
-    pass
-
-from git_helpers import get_branch_tracker, get_current_branch, BranchTracker
 
 
 class PrintChildBranchStructure(BaseCommand):

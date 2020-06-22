@@ -10,8 +10,9 @@ from git_helpers import (
     hash_for,
     run_command_expecting_failure)
 from subcommands.base_command import BaseCommand
+from type_utils import MYPY
 
-if False:
+if MYPY:
     from typing import Text, Sequence
 
 

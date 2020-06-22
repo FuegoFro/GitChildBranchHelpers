@@ -1,7 +1,9 @@
 from abc import ABCMeta, abstractmethod
 from argparse import ArgumentParser, Namespace
 
-if False:
+from type_utils import MYPY
+
+if MYPY:
     from typing import Text
 
 

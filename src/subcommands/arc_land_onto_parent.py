@@ -6,8 +6,9 @@ from argparse import ArgumentParser, Namespace
 
 from git_helpers import arc, fail_if_not_rebased, get_branch_tracker, get_current_branch
 from subcommands.base_command import BaseCommand
+from type_utils import MYPY
 
-if False:
+if MYPY:
     from typing import Text
 
 

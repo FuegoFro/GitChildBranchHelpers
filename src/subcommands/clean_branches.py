@@ -1,27 +1,14 @@
 from __future__ import print_function, unicode_literals
 
-import os
-import sys
 from argparse import ArgumentParser, Namespace
 
-from git_helpers import get_branch_tracker, get_current_branch, git, does_branch_exist, BranchTracker
+from git_helpers import BranchTracker, does_branch_exist, get_branch_tracker
 from subcommands.base_command import BaseCommand
+from type_utils import MYPY
 
-try:
-    # noinspection PyUnresolvedReferences
-    from typing import (
-        Iterable,
-        List,
-        Tuple,
-        TypeVar,
-        Text,
-    )
+if MYPY:
+    from typing import Text
 
-    T = TypeVar('T')
-except ImportError:
-    pass
-
-from git_helpers import get_branch_tracker, get_current_branch, BranchTracker
 
 class CleanBranches(BaseCommand):
     def get_name(self):
@@ -45,7 +32,7 @@ class CleanBranches(BaseCommand):
 def clean_invalid_branches(archive):
     # type: (bool) -> None
     with get_branch_tracker() as tracker:
-        for branch in tracker.list_of_branches():
+        for branch in tracker.linearized_branches():
             if _is_branch_invalid(tracker, branch):
                 if archive:
                     _archive_invalid_branch(tracker, branch)
@@ -68,8 +55,11 @@ def _delete_invalid_branch_if_possible(tracker, branch_name):
     # type: (BranchTracker, Text) -> None
     children = tracker.children_for_parent(branch_name)
     if tracker.children_for_parent(branch_name):
-        error_message = "Cannot delete invalid branch {} because it has children ({}). Try rebasing its children on a valid branch first."
-        print(error_message.format(branch_name, children))
+        error_message = (
+            "Cannot delete invalid branch {} because it has children ({})."
+            " Change each child's parent to a different branch first."
+        )
+        print(error_message.format(branch_name, ", ".join(children)))
     else:
         print("Deleting invalid branch {}".format(branch_name))
         tracker.remove_child_leaf(branch_name)

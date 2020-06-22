@@ -11,8 +11,9 @@ from subcommands.print_child_branch_structure import PrintChildBranchStructure
 from subcommands.set_branch_archived import SetBranchArchived
 from subcommands.clean_branches import CleanBranches
 from subcommands.delete_archived_branches import DeleteArchivedBranches
+from type_utils import MYPY
 
-if False:
+if MYPY:
     from typing import Sequence, Set, Text
 
 _ALL_COMMANDS = (

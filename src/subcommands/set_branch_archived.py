@@ -2,8 +2,9 @@ from argparse import ArgumentParser, Namespace
 
 from git_helpers import get_branch_tracker, get_current_branch
 from subcommands.base_command import BaseCommand
+from type_utils import MYPY
 
-if False:
+if MYPY:
     from typing import Optional, Text
 
 
