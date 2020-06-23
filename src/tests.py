@@ -184,10 +184,10 @@ def _integration_test(target_directory):
 
         print("Test deleting branch")
         # See that removing fails since it's not merged
-        _assert_fails(lambda: remove_branch(force_remove=False))
+        _assert_fails(lambda: remove_branch(get_current_branch(), force_remove=False))
         assert get_current_branch() == "sibling_branch"
         assert sibling_conflicting_commit == hash_for("HEAD")
-        remove_branch(force_remove=True)
+        remove_branch(get_current_branch(), force_remove=True)
         assert get_current_branch() == "first_branch"
         assert second_commit == hash_for("HEAD")
 
@@ -277,7 +277,7 @@ def _test_clean_branches(target_directory):
         git("branch -D ghost_branch_with_children")
 
         print("Test cleaning by archiving")
-        clean_invalid_branches(True)
+        clean_invalid_branches(dry_run=False, archive=True, upstream=False)
 
         with get_branch_tracker() as tracker:
             assert not tracker.is_archived("valid_branch")
@@ -289,7 +289,7 @@ def _test_clean_branches(target_directory):
             tracker.set_is_archived("ghost_branch_with_children", False)
 
         print("Test cleaning by deleting")
-        clean_invalid_branches(False)
+        clean_invalid_branches(dry_run=False, archive=False, upstream=False)
 
         with get_branch_tracker() as tracker:
             assert tracker.is_branch_tracked("valid_branch")

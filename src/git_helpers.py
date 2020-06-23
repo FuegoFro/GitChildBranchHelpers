@@ -376,7 +376,20 @@ def hash_for(rev):
     return git("rev-parse --verify {}".format(rev)).strip()
 
 
-def does_branch_exist(branch_name):
-    # type: (Text) -> bool
-    cmd = ["git", "show-ref", "--verify", "--quiet", "refs/heads/{}".format(branch_name)]
+def does_branch_exist(branch_name, local=True):
+    # type: (Text, bool) -> bool
+    ref_location = "heads" if local else "remotes"
+    cmd = ["git", "show-ref", "--verify", "--quiet", "refs/{}/{}".format(ref_location, branch_name)]
     return subprocess.call(cmd) == 0
+
+
+def is_branch_upstream_deleted(branch_name):
+    # type: (Text) -> bool
+    # Taken from https://stackoverflow.com/a/9753364/3000133
+    # Assume ref for branch is just branch with 'refs/heads/' prefixed. Is this ever not true?
+    upstream = git("for-each-ref --format=%(upstream:short) refs/heads/{}".format(branch_name)).strip()
+    if not upstream:
+        # Don't have an upstream set, can't be missing
+        return False
+
+    return not does_branch_exist(upstream, local=False)
