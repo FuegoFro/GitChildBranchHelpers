@@ -33,10 +33,7 @@ class CleanBranches(BaseCommand):
             help="set to `git fetch` and treat branches with set-but-deleted upstreams as invalid",
         )
         parser.add_argument(
-            "--no-upstream",
-            action="store_false",
-            dest='upstream',
-            help="turn off the -u/--upstream flag",
+            "--no-upstream", action="store_false", dest="upstream", help="turn off the -u/--upstream flag"
         )
 
     def run_command(self, args):
