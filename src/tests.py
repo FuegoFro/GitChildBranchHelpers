@@ -10,11 +10,12 @@ import subprocess
 import tempfile
 
 from git_helpers import get_branch_tracker, get_current_branch, git, hash_for
+from subcommands.base_command import BaseCommand
 from subcommands.clean_branches import clean_invalid_branches
 from subcommands.delete_archived_branches import delete_archived_branches
 from subcommands.git_make_child_branch import make_child_branch
 from subcommands.git_rebase_children import rebase_children
-from subcommands.git_remove_leaf_child import remove_branch
+from subcommands.git_remove_leaf_child import GitRemoveLeafBranch
 from subcommands.git_rename_branch import rename_current_branch
 from subcommands.print_branch_info import get_branch_info
 from subcommands.print_child_branch_structure import get_branch_structure_string, make_green
@@ -22,7 +23,7 @@ from subcommands.set_branch_archived import set_archived
 from type_utils import MYPY
 
 if MYPY:
-    from typing import Callable, Iterator, Optional, Text
+    from typing import Callable, Iterator, Optional, Sequence, Text, Type
 
 SRC_DIR = os.path.realpath(os.path.dirname(__file__))
 
@@ -49,7 +50,7 @@ master
 
 
 @contextlib.contextmanager
-def run_test(path):
+def _run_test(path):
     # type: (Text) -> Iterator[None]
     path = os.path.expanduser(path)
     target_container = os.path.dirname(path)
@@ -105,9 +106,20 @@ def _initialize_repo():
     assert get_current_branch() == "master"
 
 
+def _command_with_args(command_class, command_args=()):
+    # type: (Type[BaseCommand], Sequence[Text]) -> None
+    command = command_class()
+    command_parser = argparse.ArgumentParser()
+    command.inflate_subcommand_parser(command_parser)
+    parsed_args = command_parser.parse_args(command_args)
+    print(command_parser)
+    print(parsed_args)
+    command.run_command(parsed_args)
+
+
 def _integration_test(target_directory):
     # type: (Text) -> None
-    with run_test(target_directory):
+    with _run_test(target_directory):
         _initialize_repo()
         original_commit = hash_for("HEAD")
 
@@ -184,10 +196,10 @@ def _integration_test(target_directory):
 
         print("Test deleting branch")
         # See that removing fails since it's not merged
-        _assert_fails(lambda: remove_branch(get_current_branch(), force_remove=False))
+        _assert_fails(lambda: _command_with_args(GitRemoveLeafBranch, []))
         assert get_current_branch() == "sibling_branch"
         assert sibling_conflicting_commit == hash_for("HEAD")
-        remove_branch(get_current_branch(), force_remove=True)
+        _command_with_args(GitRemoveLeafBranch, ["--force"])
         assert get_current_branch() == "first_branch"
         assert second_commit == hash_for("HEAD")
 
@@ -250,7 +262,7 @@ def _integration_test(target_directory):
 
 def _test_clean_branches(target_directory):
     # type: (Text) -> None
-    with run_test(target_directory):
+    with _run_test(target_directory):
         _initialize_repo()
 
         # Create all the branches
@@ -299,7 +311,7 @@ def _test_clean_branches(target_directory):
 
 def _test_delete_archived_branches(target_directory):
     # type: (Text) -> None
-    with run_test(target_directory):
+    with _run_test(target_directory):
         _initialize_repo()
 
         # Create all the branches
@@ -333,7 +345,7 @@ def _test_delete_archived_branches(target_directory):
             assert not tracker.is_branch_tracked("second_branch_child_two")
 
 
-def main(target_directory):
+def run_tests(target_directory):
     # type: (Optional[Text]) -> None
     _mypy_check()
     if target_directory is None:
@@ -347,8 +359,13 @@ def main(target_directory):
     print("Tests finished successfully!")
 
 
-if __name__ == "__main__":
+def main():
+    # type: () -> None
     parser = argparse.ArgumentParser()
     parser.add_argument("--test_target_dir", default=None)
     args = parser.parse_args()
-    main(args.test_target_dir)
+    run_tests(args.test_target_dir)
+
+
+if __name__ == "__main__":
+    main()

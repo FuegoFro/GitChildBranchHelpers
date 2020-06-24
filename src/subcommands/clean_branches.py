@@ -32,6 +32,12 @@ class CleanBranches(BaseCommand):
             action="store_true",
             help="set to `git fetch` and treat branches with set-but-deleted upstreams as invalid",
         )
+        parser.add_argument(
+            "--no-upstream",
+            action="store_false",
+            dest='upstream',
+            help="turn off the -u/--upstream flag",
+        )
 
     def run_command(self, args):
         # type: (Namespace) -> None
@@ -81,6 +87,6 @@ def _delete_invalid_branch_if_possible(dry_run, tracker, branch_name, upstream):
         print("Deleting invalid branch '{}'".format(branch_name))
         if not dry_run:
             if upstream:
-                remove_branch(branch_name, force_remove=True)
+                remove_branch(tracker, branch_name, force_remove=True)
             else:
                 tracker.remove_child_leaf(branch_name)
