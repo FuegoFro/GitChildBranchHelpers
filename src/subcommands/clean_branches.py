@@ -79,7 +79,7 @@ def _delete_invalid_branch_if_possible(dry_run, tracker, branch_name, upstream):
             "Cannot delete invalid branch '{}' because it has children ({})."
             " Change each child's parent to a different branch first."
         )
-        print(error_message.format(branch_name, ", ".join("'{}'".format(child for child in children))))
+        print(error_message.format(branch_name, ", ".join("'{}'".format(child) for child in children)))
     else:
         print("Deleting invalid branch '{}'".format(branch_name))
         if not dry_run:
