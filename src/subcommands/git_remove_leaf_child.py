@@ -27,11 +27,14 @@ class GitRemoveLeafBranch(BaseCommand):
             action="store_true",
             help="forces the current branch to be removed even if it has not been merged into its parent",
         )
+        parser.add_argument(
+            "branch_name", nargs="?", help="the branch to remove; if not provided removes the current branch"
+        )
 
     def run_command(self, args):
         # type: (Namespace) -> None
         with get_branch_tracker() as tracker:
-            remove_branch(tracker, branch_name=get_current_branch(), force_remove=args.force)
+            remove_branch(tracker, branch_name=args.branch_name or get_current_branch(), force_remove=args.force)
 
 
 def remove_branch(tracker, branch_name, force_remove):
