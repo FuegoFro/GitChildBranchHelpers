@@ -106,7 +106,12 @@ def format_node(current_branch, node):
 def sorted_look_ahead(iterable):
     # type: (Iterable[T]) -> Iterable[Tuple[T, bool]]
     it = iter(sorted(iterable))
-    last = next(it)
+
+    try:
+        last = next(it)
+    except StopIteration:
+        return
+
     for val in it:
         yield last, False
         last = val
