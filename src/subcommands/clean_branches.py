@@ -45,7 +45,7 @@ def clean_invalid_branches(dry_run, archive, upstream):
     # type: (bool, bool, bool) -> None
     if upstream:
         # Make sure we have latest remote info
-        git("fetch --prune")
+        git("fetch --prune --quiet")
 
     with get_branch_tracker() as tracker:
         for branch in tracker.linearized_branches():
