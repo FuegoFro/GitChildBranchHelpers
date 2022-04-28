@@ -37,6 +37,13 @@ class GitRebaseOntoParent(BaseCommand):
             help="if set, will recursively rebase all sub-branches onto their parents",
         )
         parser.add_argument(
+            "-b",
+            "--branch",
+            help=(
+                "the branch to rebase; if not provided removes the current branch"
+            ),
+        )
+        parser.add_argument(
             "git_rebase_args",
             nargs=argparse.REMAINDER,
             help=(
@@ -47,7 +54,7 @@ class GitRebaseOntoParent(BaseCommand):
 
     def run_command(self, args):
         # type: (Namespace) -> None
-        rebase_children(args.recursive, args.git_rebase_args)
+        rebase_children(args.recursive, args.branch, args.git_rebase_args)
 
 
 def do_rebase(tracker, parent, child, extra_args):
@@ -64,9 +71,10 @@ def do_rebase(tracker, parent, child, extra_args):
     tracker.finish_rebase(child, parent_rev)
 
 
-def rebase_children(is_recursive, extra_git_rebase_args=()):
-    # type: (bool, Sequence[Text]) -> None
-    current_branch = get_current_branch()
+def rebase_children(is_recursive, branch, extra_git_rebase_args=()):
+    # type: (bool, Optional[Text], Sequence[Text]) -> None
+    if branch is None:
+        branch = get_current_branch()
     if extra_git_rebase_args:
         # If the first extra arg starts with "-", "--" must also have been passed, and
         # argparse doesn't remove it for us
@@ -77,10 +85,10 @@ def rebase_children(is_recursive, extra_git_rebase_args=()):
         extra_args = ""
 
     with get_branch_tracker() as tracker:
-        do_rebase(tracker, tracker.parent_for_child(current_branch), current_branch, extra_args)
+        do_rebase(tracker, tracker.parent_for_child(branch), branch, extra_args)
 
         if is_recursive:
-            to_rebase_onto = [current_branch]
+            to_rebase_onto = [branch]
             while to_rebase_onto:
                 parent = to_rebase_onto.pop()
                 children = tracker.children_for_parent(parent)
@@ -89,4 +97,4 @@ def rebase_children(is_recursive, extra_git_rebase_args=()):
                     to_rebase_onto.append(child)
 
         # Go back to where we started.
-        git("checkout {}".format(current_branch))
+        git("checkout {}".format(branch))
