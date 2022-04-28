@@ -58,6 +58,16 @@ def make_green(message):
     return before + message + after
 
 
+def make_magenta(message):
+    # type: (Text) -> Text
+    if output_supports_color():
+        before = "\033[0;35m"
+        after = "\033[0m"
+    else:
+        before = after = ""
+    return before + message + after
+
+
 def get_branch_structure_string(show_all):
     # type: (bool) -> Text
     current_branch = get_current_branch()
@@ -87,7 +97,7 @@ def _get_branch_structure_parts_internal(tracker, current_branch, roots, structu
         if not first:
             structure_parts.append("")
         first = False
-        structure_parts.append(format_node(current_branch, root))
+        structure_parts.append(format_node(current_branch, root, is_archived=False))
         child_skipped_archived = _add_tree_parts(tracker, current_branch, root, structure_parts, "", show_all)
         # NOTE: Don't inline this 'or' because it will cause the recursive call not to happen due
         # to short circuiting.
@@ -95,12 +105,13 @@ def _get_branch_structure_parts_internal(tracker, current_branch, roots, structu
     return skipped_archived
 
 
-def format_node(current_branch, node):
-    # type: (Text, Text) -> Text
+def format_node(current_branch, node, is_archived):
+    # type: (Text, Text, bool) -> Text
     if node == current_branch:
-        return make_green(node)
-    else:
-        return node
+        node = make_green(node)
+    if is_archived:
+        node = '{} {}'.format(node, make_magenta('(archived)'))
+    return node
 
 
 def sorted_look_ahead(iterable):
@@ -140,7 +151,7 @@ def _add_tree_parts(tracker, current_branch, node, parts, indent_characters, sho
         else:
             prefix = "├── "
             child_indent = "│   "
-        parts.append(indent_characters + prefix + format_node(current_branch, child))
+        parts.append(indent_characters + prefix + format_node(current_branch, child, tracker.is_archived(child)))
 
         child_skipped_archived = _add_tree_parts(
             tracker, current_branch, child, parts, indent_characters + child_indent, show_all
