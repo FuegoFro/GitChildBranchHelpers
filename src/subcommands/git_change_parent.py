@@ -22,11 +22,20 @@ class GitChangeParent(BaseCommand):
     def inflate_subcommand_parser(self, parser):
         # type: (ArgumentParser) -> None
         parser.add_argument("new_parent", help="the name of the branch to be this branch's parent")
+        parser.add_argument(
+            "--branch",
+            "-b",
+            required=False,
+            help=(
+                "the branch to change the parent of. If not supplied, it changes the parent of "
+                "the current branch."
+            ),
+        )
 
     def run_command(self, args):
         # type: (Namespace) -> None
         new_parent = args.new_parent
-        current_branch = get_current_branch()
+        branch = args.branch or get_current_branch()
         with get_branch_tracker() as tracker:
-            tracker.set_parent(current_branch, new_parent)
+            tracker.set_parent(branch, new_parent)
         print("You may want to rebase on top of the new parent to make sure its changes are " "visible in this branch.")
