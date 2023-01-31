@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 from argparse import ArgumentParser, Namespace
 
 from git_helpers import get_branch_tracker, get_current_branch, git
@@ -8,10 +6,10 @@ from typing import Text
 
 
 class GitRenameBranch(BaseCommand):
-    def get_name(self) -> Text:
+    def get_name(self) -> str:
         return "rename"
 
-    def get_short_description(self) -> Text:
+    def get_short_description(self) -> str:
         return "rename the current branch"
 
     def inflate_subcommand_parser(self, parser: ArgumentParser) -> None:
@@ -22,7 +20,7 @@ class GitRenameBranch(BaseCommand):
         rename_current_branch(args.new_branch_name, args.force)
 
 
-def rename_current_branch(new_branch_name: Text, force: bool) -> None:
+def rename_current_branch(new_branch_name: str, force: bool) -> None:
     current_branch = get_current_branch()
     with get_branch_tracker() as tracker:
         git("checkout -b {}".format(new_branch_name))

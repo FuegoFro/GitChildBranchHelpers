@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 import argparse
 from argparse import ArgumentParser, Namespace
 
@@ -9,10 +7,10 @@ from typing import Text
 
 
 class ArcDiffAgainstParent(BaseCommand):
-    def get_name(self) -> Text:
+    def get_name(self) -> str:
         return "arc-diff"
 
-    def get_short_description(self) -> Text:
+    def get_short_description(self) -> str:
         return "`arc diff` this branch against its parent branch"
 
     def inflate_subcommand_parser(self, parser: ArgumentParser) -> None:

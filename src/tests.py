@@ -1,6 +1,3 @@
-# coding=utf-8
-from __future__ import print_function, unicode_literals
-
 import argparse
 import contextlib
 import glob
@@ -31,7 +28,7 @@ def process_branch_structure(branch_structure: str) -> str:
 
 
 @contextlib.contextmanager
-def _run_test(path: Text) -> Iterator[None]:
+def _run_test(path: str) -> Iterator[None]:
     path = os.path.expanduser(path)
     target_container = os.path.dirname(path)
     assert not os.path.exists(path)
@@ -78,7 +75,7 @@ def _initialize_repo() -> None:
     assert get_current_branch() == "main"
 
 
-def _command_with_args(command_class: Type[BaseCommand], command_args: Sequence[Text] = ()) -> None:
+def _command_with_args(command_class: Type[BaseCommand], command_args: Sequence[str] = ()) -> None:
     command = command_class()
     command_parser = argparse.ArgumentParser()
     command.inflate_subcommand_parser(command_parser)
@@ -88,7 +85,7 @@ def _command_with_args(command_class: Type[BaseCommand], command_args: Sequence[
     command.run_command(parsed_args)
 
 
-def _integration_test(target_directory: Text) -> None:
+def _integration_test(target_directory: str) -> None:
     with _run_test(target_directory):
         _initialize_repo()
         original_commit = hash_for("HEAD")
@@ -264,7 +261,7 @@ def _integration_test(target_directory: Text) -> None:
             assert str(e) == "Branch does not have a parent: main"
 
 
-def _test_clean_branches(target_directory: Text) -> None:
+def _test_clean_branches(target_directory: str) -> None:
     with _run_test(target_directory):
         _initialize_repo()
 
@@ -312,7 +309,7 @@ def _test_clean_branches(target_directory: Text) -> None:
             assert tracker.is_branch_tracked("ghost_branch_with_children")
 
 
-def _test_delete_archived_branches(target_directory: Text) -> None:
+def _test_delete_archived_branches(target_directory: str) -> None:
     with _run_test(target_directory):
         _initialize_repo()
 
@@ -347,7 +344,7 @@ def _test_delete_archived_branches(target_directory: Text) -> None:
             assert not tracker.is_branch_tracked("second_branch_child_two")
 
 
-def run_tests(target_directory: Optional[Text]) -> None:
+def run_tests(target_directory: Optional[str]) -> None:
     _mypy_check()
     if target_directory is None:
         target_directory = tempfile.mkdtemp()

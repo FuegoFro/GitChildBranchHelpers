@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 from argparse import ArgumentParser, Namespace
 
 from git_helpers import get_branch_tracker, get_current_branch
@@ -8,10 +6,10 @@ from typing import Optional, Text
 
 
 class SetBranchArchived(BaseCommand):
-    def get_name(self) -> Text:
+    def get_name(self) -> str:
         return "set-archived"
 
-    def get_short_description(self) -> Text:
+    def get_short_description(self) -> str:
         return "sets whether or not a branch is 'archived'"
 
     def inflate_subcommand_parser(self, parser: ArgumentParser) -> None:
@@ -28,7 +26,7 @@ class SetBranchArchived(BaseCommand):
         set_archived(not args.unarchive, args.branch_to_set_archive_property)
 
 
-def set_archived(archived: bool, branch_name: Optional[Text] = None) -> None:
+def set_archived(archived: bool, branch_name: Optional[str] = None) -> None:
     if branch_name is None:
         branch_name = get_current_branch()
     with get_branch_tracker() as tracker:

@@ -1,5 +1,3 @@
-from __future__ import print_function, unicode_literals
-
 from argparse import ArgumentParser, Namespace
 
 from git_helpers import BranchTracker, get_branch_tracker, get_current_branch, git, hash_for
@@ -8,10 +6,10 @@ from typing import Text
 
 
 class GitRemoveLeafBranch(BaseCommand):
-    def get_name(self) -> Text:
+    def get_name(self) -> str:
         return "remove-branch"
 
-    def get_short_description(self) -> Text:
+    def get_short_description(self) -> str:
         return "deletes the current branch, if it is merged into its parent"
 
     def inflate_subcommand_parser(self, parser: ArgumentParser) -> None:
@@ -30,7 +28,7 @@ class GitRemoveLeafBranch(BaseCommand):
             remove_branch(tracker, branch_name=args.branch_name or get_current_branch(), force_remove=args.force)
 
 
-def remove_branch(tracker: BranchTracker, branch_name: Text, force_remove: bool) -> None:
+def remove_branch(tracker: BranchTracker, branch_name: str, force_remove: bool) -> None:
     branch_commit = hash_for(branch_name)
     parent = tracker.parent_for_child(branch_name)
     children = tracker.children_for_parent(branch_name)

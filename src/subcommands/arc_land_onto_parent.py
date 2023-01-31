@@ -1,5 +1,3 @@
-from __future__ import print_function, unicode_literals
-
 import argparse
 import sys
 from argparse import ArgumentParser, Namespace
@@ -10,10 +8,10 @@ from typing import Text
 
 
 class ArcLandOntoParent(BaseCommand):
-    def get_name(self) -> Text:
+    def get_name(self) -> str:
         return "arc-land"
 
-    def get_short_description(self) -> Text:
+    def get_short_description(self) -> str:
         return "`arc land` this branch onto its parent branch"
 
     def inflate_subcommand_parser(self, parser: ArgumentParser) -> None:

@@ -1,5 +1,3 @@
-from __future__ import print_function, unicode_literals
-
 from argparse import ArgumentParser, Namespace
 
 from git_helpers import BranchTracker, does_branch_exist, get_branch_tracker, git, is_branch_upstream_deleted
@@ -9,10 +7,10 @@ from typing import Text
 
 
 class CleanBranches(BaseCommand):
-    def get_name(self) -> Text:
+    def get_name(self) -> str:
         return "clean-branches"
 
-    def get_short_description(self) -> Text:
+    def get_short_description(self) -> str:
         return "deletes branches that are no longer known to git"
 
     def inflate_subcommand_parser(self, parser: ArgumentParser) -> None:
@@ -48,20 +46,20 @@ def clean_invalid_branches(dry_run: bool, archive: bool, upstream: bool) -> None
                     _delete_invalid_branch_if_possible(dry_run, tracker, branch, upstream)
 
 
-def _is_branch_invalid(tracker: BranchTracker, branch_name: Text, upstream: bool) -> bool:
+def _is_branch_invalid(tracker: BranchTracker, branch_name: str, upstream: bool) -> bool:
     if upstream:
         return is_branch_upstream_deleted(branch_name)
 
     return not does_branch_exist(branch_name) and not tracker.is_archived(branch_name)
 
 
-def _archive_invalid_branch(dry_run: bool, tracker: BranchTracker, branch_name: Text) -> None:
+def _archive_invalid_branch(dry_run: bool, tracker: BranchTracker, branch_name: str) -> None:
     print("Archiving invalid branch '{}'".format(branch_name))
     if not dry_run:
         tracker.set_is_archived(branch_name, True)
 
 
-def _delete_invalid_branch_if_possible(dry_run: bool, tracker: BranchTracker, branch_name: Text, upstream: bool) -> None:
+def _delete_invalid_branch_if_possible(dry_run: bool, tracker: BranchTracker, branch_name: str, upstream: bool) -> None:
     children = tracker.children_for_parent(branch_name)
     if tracker.children_for_parent(branch_name):
         error_message = (

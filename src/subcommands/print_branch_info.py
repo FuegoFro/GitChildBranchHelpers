@@ -1,5 +1,3 @@
-from __future__ import print_function, unicode_literals
-
 import sys
 from argparse import ArgumentParser, Namespace
 
@@ -9,10 +7,10 @@ from typing import Optional, Text
 
 
 class PrintBranchInfo(BaseCommand):
-    def get_name(self) -> Text:
+    def get_name(self) -> str:
         return "print-branch-info"
 
-    def get_short_description(self) -> Text:
+    def get_short_description(self) -> str:
         return "prints parent name and base revision of a single branch"
 
     def inflate_subcommand_parser(self, parser: ArgumentParser) -> None:
@@ -32,7 +30,7 @@ class PrintBranchInfo(BaseCommand):
         print(get_branch_info(args.branch, args.z))
 
 
-def get_branch_info(branch: Optional[Text], use_null_delimiter: bool) -> Text:
+def get_branch_info(branch: Optional[str], use_null_delimiter: bool) -> str:
     if branch is None:
         branch = get_current_branch()
 

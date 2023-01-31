@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 import argparse
 import subprocess
 from argparse import ArgumentParser, Namespace
@@ -17,10 +15,10 @@ from typing import Sequence, Text, Optional
 
 
 class GitRebaseOntoParent(BaseCommand):
-    def get_name(self) -> Text:
+    def get_name(self) -> str:
         return "rebase"
 
-    def get_short_description(self) -> Text:
+    def get_short_description(self) -> str:
         return "rebase the current branch onto its parent"
 
     def inflate_subcommand_parser(self, parser: ArgumentParser) -> None:
@@ -50,7 +48,7 @@ class GitRebaseOntoParent(BaseCommand):
         rebase_children(args.recursive, args.branch, args.git_rebase_args)
 
 
-def do_rebase(tracker: BranchTracker, parent: Text, child: Text, extra_args: Text) -> None:
+def do_rebase(tracker: BranchTracker, parent: str, child: str, extra_args: str) -> None:
     base = tracker.base_for_branch(child)
     parent_rev = hash_for(parent)
     if base == parent_rev:
@@ -63,7 +61,7 @@ def do_rebase(tracker: BranchTracker, parent: Text, child: Text, extra_args: Tex
     tracker.finish_rebase(child, parent_rev)
 
 
-def rebase_children(is_recursive: bool, branch: Optional[Text], extra_git_rebase_args: Sequence[Text] = ()) -> None:
+def rebase_children(is_recursive: bool, branch: Optional[str], extra_git_rebase_args: Sequence[str] = ()) -> None:
     if branch is None:
         branch = get_current_branch()
     if extra_git_rebase_args:

@@ -1,6 +1,3 @@
-# coding=utf-8
-from __future__ import print_function, unicode_literals
-
 import os
 import sys
 from argparse import ArgumentParser, Namespace
@@ -11,10 +8,10 @@ from typing import Iterable, List, Text, Tuple
 
 
 class PrintChildBranchStructure(BaseCommand):
-    def get_name(self) -> Text:
+    def get_name(self) -> str:
         return "print-structure"
 
-    def get_short_description(self) -> Text:
+    def get_short_description(self) -> str:
         return "prints the dependency structure of the branches"
 
     def inflate_subcommand_parser(self, parser: ArgumentParser) -> None:
@@ -38,7 +35,7 @@ def output_supports_color() -> bool:
     return supported_platform and is_a_tty
 
 
-def make_green(message: Text) -> Text:
+def make_green(message: str) -> str:
     if output_supports_color():
         before = "\033[0;32m"
         after = "\033[0m"
@@ -47,7 +44,7 @@ def make_green(message: Text) -> Text:
     return before + message + after
 
 
-def make_magenta(message: Text) -> Text:
+def make_magenta(message: str) -> str:
     if output_supports_color():
         before = "\033[0;35m"
         after = "\033[0m"
@@ -56,9 +53,9 @@ def make_magenta(message: Text) -> Text:
     return before + message + after
 
 
-def get_branch_structure_string(show_all: bool) -> Text:
+def get_branch_structure_string(show_all: bool) -> str:
     current_branch = get_current_branch()
-    structure_parts: List[Text] = []
+    structure_parts: List[str] = []
     with get_branch_tracker() as tracker:
         roots = []
         for parent in tracker.get_all_parents():
@@ -76,7 +73,7 @@ def get_branch_structure_string(show_all: bool) -> Text:
     return "\n".join(structure_parts)
 
 
-def _get_branch_structure_parts_internal(tracker: BranchTracker, current_branch: Text, roots: List[Text], structure_parts: List[Text], show_all: bool) -> bool:
+def _get_branch_structure_parts_internal(tracker: BranchTracker, current_branch: str, roots: List[str], structure_parts: List[str], show_all: bool) -> bool:
     first = True
     skipped_archived = False
     for root in roots:
@@ -91,7 +88,7 @@ def _get_branch_structure_parts_internal(tracker: BranchTracker, current_branch:
     return skipped_archived
 
 
-def format_node(current_branch: Text, node: Text, is_archived: bool) -> Text:
+def format_node(current_branch: str, node: str, is_archived: bool) -> str:
     if node == current_branch:
         node = make_green(node)
     if is_archived:
@@ -99,7 +96,7 @@ def format_node(current_branch: Text, node: Text, is_archived: bool) -> Text:
     return node
 
 
-def sorted_look_ahead(iterable: Iterable[Text]) -> Iterable[Tuple[Text, bool]]:
+def sorted_look_ahead(iterable: Iterable[str]) -> Iterable[Tuple[str, bool]]:
     it = iter(sorted(iterable))
 
     try:
@@ -113,7 +110,7 @@ def sorted_look_ahead(iterable: Iterable[Text]) -> Iterable[Tuple[Text, bool]]:
     yield last, True
 
 
-def _add_tree_parts(tracker: BranchTracker, current_branch: Text, node: Text, parts: List[Text], indent_characters: Text, show_all: bool) -> bool:
+def _add_tree_parts(tracker: BranchTracker, current_branch: str, node: str, parts: List[str], indent_characters: str, show_all: bool) -> bool:
     # Then print the children
     skipped_archived = False
     children = []

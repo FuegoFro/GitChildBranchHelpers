@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 from argparse import ArgumentParser, Namespace
 
 from git_helpers import get_branch_tracker, get_current_branch, git, hash_for
@@ -8,10 +6,10 @@ from typing import Optional, Text
 
 
 class GitMakeChildBranch(BaseCommand):
-    def get_name(self) -> Text:
+    def get_name(self) -> str:
         return "make-branch"
 
-    def get_short_description(self) -> Text:
+    def get_short_description(self) -> str:
         return "creates a new branch at the current commit with the current branch as its parent"
 
     def inflate_subcommand_parser(self, parser: ArgumentParser) -> None:
@@ -30,7 +28,7 @@ class GitMakeChildBranch(BaseCommand):
         make_child_branch(args.new_branch_name, args.revision)
 
 
-def make_child_branch(new_branch_name: Text, revision: Optional[Text] = None) -> None:
+def make_child_branch(new_branch_name: str, revision: Optional[str] = None) -> None:
     parent = get_current_branch()
     if revision is None:
         # Use the current revision as the base

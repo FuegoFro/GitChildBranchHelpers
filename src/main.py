@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 import argparse
 
 from subcommands import get_commands

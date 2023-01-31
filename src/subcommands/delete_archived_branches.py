@@ -1,5 +1,3 @@
-from __future__ import print_function, unicode_literals
-
 from argparse import ArgumentParser, Namespace
 
 from git_helpers import get_branch_tracker
@@ -8,10 +6,10 @@ from typing import Text
 
 
 class DeleteArchivedBranches(BaseCommand):
-    def get_name(self) -> Text:
+    def get_name(self) -> str:
         return "delete-archived"
 
-    def get_short_description(self) -> Text:
+    def get_short_description(self) -> str:
         return "deletes all archived branches"
 
     def inflate_subcommand_parser(self, parser: ArgumentParser) -> None:

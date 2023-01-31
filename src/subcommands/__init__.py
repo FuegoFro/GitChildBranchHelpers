@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 from subcommands.arc_diff_against_parent import ArcDiffAgainstParent
 from subcommands.arc_land_onto_parent import ArcLandOntoParent
 from subcommands.base_command import BaseCommand as _BaseCommand
@@ -32,7 +30,7 @@ _ALL_COMMANDS = (
 
 
 def get_commands() -> Sequence[_BaseCommand]:
-    seen_command_names: Set[Text] = set()
+    seen_command_names: Set[str] = set()
     for subcommand in _ALL_COMMANDS:
         subcommand_name = subcommand.get_name()
         assert subcommand_name not in seen_command_names, "Duplicate command name: {}".format(subcommand_name)
