@@ -3,7 +3,6 @@ from argparse import ArgumentParser, Namespace
 from git_helpers import BranchTracker, does_branch_exist, get_branch_tracker, git, is_branch_upstream_deleted
 from subcommands.base_command import BaseCommand
 from subcommands.git_remove_leaf_child import remove_branch
-from typing import Text
 
 
 class CleanBranches(BaseCommand):

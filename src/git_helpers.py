@@ -1,12 +1,11 @@
-import _csv
 import csv
 import os
 import shutil
 import subprocess
-import sys
 from collections import defaultdict, deque
+from typing import Any, BinaryIO, Callable, Dict, Iterable, List, Tuple, TypeVar
 
-from typing import Any, BinaryIO, Callable, Dict, Iterable, List, Text, Tuple, TypeVar
+import _csv
 
 T = TypeVar("T")
 
@@ -19,7 +18,7 @@ def get_current_branch() -> str:
     return git("rev-parse --abbrev-ref HEAD").strip()
 
 
-def get_branch_tracker() -> 'BranchTrackerWrapper':
+def get_branch_tracker() -> "BranchTrackerWrapper":
     git_dir = git("rev-parse --git-dir").strip()
     config_dir = os.path.join(git_dir, "child_branch_helper")
     if os.path.exists(config_dir):
@@ -40,7 +39,7 @@ def does_branch_contain_commit(branch: str, commit: str) -> bool:
         return False
 
 
-def fail_if_not_rebased(current_branch: str, parent: str, tracker: 'BranchTracker') -> None:
+def fail_if_not_rebased(current_branch: str, parent: str, tracker: "BranchTracker") -> None:
     base = tracker.base_for_branch(current_branch)
     if not does_branch_contain_commit(parent, base):
         print("Please rebase this branch on top of its parent")
@@ -69,7 +68,7 @@ def run_command_expecting_failure(command_runner: Callable[[List[str]], T], prog
         exit(1)
 
 
-def get_csv_reader(f: BinaryIO) -> '_csv._reader':
+def get_csv_reader(f: BinaryIO) -> "_csv._reader":
     return csv.reader(line.decode() for line in f)
 
 
@@ -78,7 +77,7 @@ class BranchTrackerWrapper:
         super().__init__()
         self.config_file = config_file
 
-    def __enter__(self) -> 'BranchTracker':
+    def __enter__(self) -> "BranchTracker":
         self.branch_tracker = BranchTracker(self.config_file)
         return self.branch_tracker
 

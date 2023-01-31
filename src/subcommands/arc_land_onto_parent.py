@@ -1,10 +1,8 @@
 import argparse
-import sys
 from argparse import ArgumentParser, Namespace
 
 from git_helpers import arc, fail_if_not_rebased, get_branch_tracker, get_current_branch
 from subcommands.base_command import BaseCommand
-from typing import Text
 
 
 class ArcLandOntoParent(BaseCommand):
@@ -41,9 +39,7 @@ class ArcLandOntoParent(BaseCommand):
             fail_if_not_rebased(current_branch, parent, tracker)
 
             if parent != "master":
-                should_land = input(
-                    "Are you sure you want to land onto non-master branch '{}'? [y/N] ".format(parent)
-                )
+                should_land = input("Are you sure you want to land onto non-master branch '{}'? [y/N] ".format(parent))
                 should_land = should_land.lower()
                 if should_land not in ("y", "yes"):
                     print("Aborting land")

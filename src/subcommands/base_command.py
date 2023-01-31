@@ -1,7 +1,5 @@
-from abc import abstractmethod, ABC
+from abc import ABC, abstractmethod
 from argparse import ArgumentParser, Namespace
-
-from typing import Text
 
 
 class BaseCommand(ABC):

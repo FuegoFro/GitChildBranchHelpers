@@ -2,7 +2,6 @@ from argparse import ArgumentParser, Namespace
 
 from git_helpers import get_branch_tracker, get_current_branch
 from subcommands.base_command import BaseCommand
-from typing import Text
 
 
 class GitChangeParent(BaseCommand):
@@ -19,8 +18,7 @@ class GitChangeParent(BaseCommand):
             "-b",
             required=False,
             help=(
-                "the branch to change the parent of. If not supplied, it changes the parent of "
-                "the current branch."
+                "the branch to change the parent of. If not supplied, it changes the parent of " "the current branch."
             ),
         )
 

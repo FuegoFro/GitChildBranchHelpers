@@ -1,6 +1,7 @@
 import argparse
 import subprocess
 from argparse import ArgumentParser, Namespace
+from typing import Optional, Sequence
 
 from git_helpers import (
     BranchTracker,
@@ -11,7 +12,6 @@ from git_helpers import (
     run_command_expecting_failure,
 )
 from subcommands.base_command import BaseCommand
-from typing import Sequence, Text, Optional
 
 
 class GitRebaseOntoParent(BaseCommand):
@@ -31,9 +31,7 @@ class GitRebaseOntoParent(BaseCommand):
         parser.add_argument(
             "-b",
             "--branch",
-            help=(
-                "the branch to rebase; if not provided removes the current branch"
-            ),
+            help=("the branch to rebase; if not provided removes the current branch"),
         )
         parser.add_argument(
             "git_rebase_args",

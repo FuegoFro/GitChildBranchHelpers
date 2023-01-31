@@ -3,7 +3,6 @@ from argparse import ArgumentParser, Namespace
 
 from git_helpers import arc, get_branch_tracker, get_current_branch
 from subcommands.base_command import BaseCommand
-from typing import Text
 
 
 class ArcDiffAgainstParent(BaseCommand):

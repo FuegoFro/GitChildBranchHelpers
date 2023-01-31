@@ -6,4 +6,6 @@ if [[ ! -e ./venv/bin/python ]]; then
     exit 1
 fi
 
-exec ./venv/bin/python ./src/tests.py
+./venv/bin/python -m black src
+./venv/bin/python -m isort src
+./venv/bin/python -m flake8 src

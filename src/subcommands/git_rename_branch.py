@@ -2,7 +2,6 @@ from argparse import ArgumentParser, Namespace
 
 from git_helpers import get_branch_tracker, get_current_branch, git
 from subcommands.base_command import BaseCommand
-from typing import Text
 
 
 class GitRenameBranch(BaseCommand):

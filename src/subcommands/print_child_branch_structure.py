@@ -1,10 +1,10 @@
 import os
 import sys
 from argparse import ArgumentParser, Namespace
+from typing import Iterable, List, Tuple
 
 from git_helpers import BranchTracker, get_branch_tracker, get_current_branch
 from subcommands.base_command import BaseCommand
-from typing import Iterable, List, Text, Tuple
 
 
 class PrintChildBranchStructure(BaseCommand):
@@ -73,7 +73,9 @@ def get_branch_structure_string(show_all: bool) -> str:
     return "\n".join(structure_parts)
 
 
-def _get_branch_structure_parts_internal(tracker: BranchTracker, current_branch: str, roots: List[str], structure_parts: List[str], show_all: bool) -> bool:
+def _get_branch_structure_parts_internal(
+    tracker: BranchTracker, current_branch: str, roots: List[str], structure_parts: List[str], show_all: bool
+) -> bool:
     first = True
     skipped_archived = False
     for root in roots:
@@ -92,7 +94,7 @@ def format_node(current_branch: str, node: str, is_archived: bool) -> str:
     if node == current_branch:
         node = make_green(node)
     if is_archived:
-        node = '{} {}'.format(node, make_magenta('(archived)'))
+        node = "{} {}".format(node, make_magenta("(archived)"))
     return node
 
 
@@ -110,7 +112,9 @@ def sorted_look_ahead(iterable: Iterable[str]) -> Iterable[Tuple[str, bool]]:
     yield last, True
 
 
-def _add_tree_parts(tracker: BranchTracker, current_branch: str, node: str, parts: List[str], indent_characters: str, show_all: bool) -> bool:
+def _add_tree_parts(
+    tracker: BranchTracker, current_branch: str, node: str, parts: List[str], indent_characters: str, show_all: bool
+) -> bool:
     # Then print the children
     skipped_archived = False
     children = []

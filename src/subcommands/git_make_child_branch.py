@@ -1,8 +1,8 @@
 from argparse import ArgumentParser, Namespace
+from typing import Optional
 
 from git_helpers import get_branch_tracker, get_current_branch, git, hash_for
 from subcommands.base_command import BaseCommand
-from typing import Optional, Text
 
 
 class GitMakeChildBranch(BaseCommand):

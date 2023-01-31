@@ -2,7 +2,6 @@ from argparse import ArgumentParser, Namespace
 
 from git_helpers import get_branch_tracker
 from subcommands.base_command import BaseCommand
-from typing import Text
 
 
 class DeleteArchivedBranches(BaseCommand):

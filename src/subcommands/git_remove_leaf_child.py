@@ -2,7 +2,6 @@ from argparse import ArgumentParser, Namespace
 
 from git_helpers import BranchTracker, get_branch_tracker, get_current_branch, git, hash_for
 from subcommands.base_command import BaseCommand
-from typing import Text
 
 
 class GitRemoveLeafBranch(BaseCommand):

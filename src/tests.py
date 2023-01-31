@@ -7,6 +7,7 @@ import subprocess
 import sys
 import tempfile
 import textwrap
+from typing import Callable, Iterator, Optional, Sequence, Type
 
 from git_helpers import get_branch_tracker, get_current_branch, git, hash_for
 from subcommands.base_command import BaseCommand
@@ -19,12 +20,12 @@ from subcommands.git_rename_branch import rename_current_branch
 from subcommands.print_branch_info import get_branch_info
 from subcommands.print_child_branch_structure import get_branch_structure_string, make_green, make_magenta
 from subcommands.set_branch_archived import set_archived
-from typing import Callable, Iterator, Optional, Sequence, Text, Type
 
 SRC_DIR = os.path.realpath(os.path.dirname(__file__))
 
+
 def process_branch_structure(branch_structure: str) -> str:
-    return textwrap.dedent(branch_structure).strip('\n')
+    return textwrap.dedent(branch_structure).strip("\n")
 
 
 @contextlib.contextmanager
@@ -64,7 +65,7 @@ def _mypy_check() -> None:
 
 def _initialize_repo() -> None:
     """
-        Initialize a repo and add a first commit so we can tell what branch we're on.
+    Initialize a repo and add a first commit so we can tell what branch we're on.
     """
     print("Initializing repo")
     git("init")
@@ -197,7 +198,8 @@ def _integration_test(target_directory: str) -> None:
         rebase_children(True, None)
         assert current_commit == hash_for("HEAD")
 
-        x = process_branch_structure(f"""
+        x = process_branch_structure(
+            f"""
             main
             │
             └── first_branch
@@ -212,7 +214,8 @@ def _integration_test(target_directory: str) -> None:
         assert get_branch_structure_string(False) == x
 
         set_archived(True, "second_branch")
-        assert get_branch_structure_string(False) == process_branch_structure(f"""
+        assert get_branch_structure_string(False) == process_branch_structure(
+            f"""
             main
             │
             └── first_branch
@@ -221,7 +224,8 @@ def _integration_test(target_directory: str) -> None:
             (not displaying archived branches, run with --all to see them)
             """
         )
-        assert get_branch_structure_string(True) == process_branch_structure(f"""
+        assert get_branch_structure_string(True) == process_branch_structure(
+            f"""
             main
             │
             └── first_branch
@@ -236,7 +240,8 @@ def _integration_test(target_directory: str) -> None:
 
         git("checkout second_branch")
         set_archived(False)
-        assert get_branch_structure_string(False) == process_branch_structure(f"""
+        assert get_branch_structure_string(False) == process_branch_structure(
+            f"""
             main
             │
             └── first_branch

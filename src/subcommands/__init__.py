@@ -1,3 +1,5 @@
+from typing import Sequence, Set
+
 from subcommands.arc_diff_against_parent import ArcDiffAgainstParent
 from subcommands.arc_land_onto_parent import ArcLandOntoParent
 from subcommands.base_command import BaseCommand as _BaseCommand
@@ -11,7 +13,6 @@ from subcommands.git_rename_branch import GitRenameBranch
 from subcommands.print_branch_info import PrintBranchInfo
 from subcommands.print_child_branch_structure import PrintChildBranchStructure
 from subcommands.set_branch_archived import SetBranchArchived
-from typing import Sequence, Set, Text
 
 _ALL_COMMANDS = (
     ArcDiffAgainstParent(),
