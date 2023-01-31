@@ -12,11 +12,7 @@ T = TypeVar("T")
 
 
 def git(command: str) -> str:
-    ret = run_command_expecting_failure(subprocess.check_output, "git", command)
-    if sys.version_info[0] >= 3:
-        return ret.decode()
-    else:
-        return ret
+    return run_command_expecting_failure(subprocess.check_output, "git", command).decode()
 
 
 def get_current_branch() -> str:
@@ -74,11 +70,7 @@ def run_command_expecting_failure(command_runner: Callable[[List[str]], T], prog
 
 
 def get_csv_reader(f: BinaryIO) -> '_csv._reader':
-    if sys.version_info[0] >= 3:
-        generator = (line.decode() for line in f)
-    else:
-        generator = (str(line) for line in f)
-    return csv.reader(generator)
+    return csv.reader(line.decode() for line in f)
 
 
 class BranchTrackerWrapper:

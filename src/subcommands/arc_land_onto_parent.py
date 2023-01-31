@@ -41,11 +41,7 @@ class ArcLandOntoParent(BaseCommand):
             fail_if_not_rebased(current_branch, parent, tracker)
 
             if parent != "master":
-                if sys.version_info[0] >= 3:
-                    input_func = input
-                else:
-                    input_func = raw_input  # noqa: F821
-                should_land = input_func(
+                should_land = input(
                     "Are you sure you want to land onto non-master branch '{}'? [y/N] ".format(parent)
                 )
                 should_land = should_land.lower()

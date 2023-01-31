@@ -1,7 +1,6 @@
-from abc import abstractmethod
+from abc import abstractmethod, ABC
 from argparse import ArgumentParser, Namespace
 
-from type_utils import ABC
 from typing import Text
 
 
