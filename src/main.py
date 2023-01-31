@@ -6,8 +6,7 @@ from subcommands import get_commands
 from subcommands.base_command import BaseCommand
 
 
-def main():
-    # type: () -> None
+def main() -> None:
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(
         title="actions", description="valid actions", help="run <action> -h for more details"
@@ -19,7 +18,7 @@ def main():
         command_parser.set_defaults(command_obj=command)
 
     args = parser.parse_args()
-    command_obj = args.command_obj  # type: BaseCommand
+    command_obj: BaseCommand = args.command_obj
     del args.command_obj
     command_obj.run_command(args)
 

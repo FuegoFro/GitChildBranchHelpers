@@ -4,23 +4,17 @@ from argparse import ArgumentParser, Namespace
 
 from git_helpers import get_branch_tracker, get_current_branch
 from subcommands.base_command import BaseCommand
-from type_utils import MYPY
-
-if MYPY:
-    from typing import Text
+from typing import Text
 
 
 class GitChangeParent(BaseCommand):
-    def get_name(self):
-        # type: () -> Text
+    def get_name(self) -> Text:
         return "change-parent"
 
-    def get_short_description(self):
-        # type: () -> Text
+    def get_short_description(self) -> Text:
         return "change the parent branch of the currently checked out branch"
 
-    def inflate_subcommand_parser(self, parser):
-        # type: (ArgumentParser) -> None
+    def inflate_subcommand_parser(self, parser: ArgumentParser) -> None:
         parser.add_argument("new_parent", help="the name of the branch to be this branch's parent")
         parser.add_argument(
             "--branch",
@@ -32,8 +26,7 @@ class GitChangeParent(BaseCommand):
             ),
         )
 
-    def run_command(self, args):
-        # type: (Namespace) -> None
+    def run_command(self, args: Namespace) -> None:
         new_parent = args.new_parent
         branch = args.branch or get_current_branch()
         with get_branch_tracker() as tracker:

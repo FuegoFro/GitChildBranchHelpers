@@ -4,23 +4,17 @@ from argparse import ArgumentParser, Namespace
 
 from git_helpers import get_branch_tracker, get_current_branch, git, hash_for
 from subcommands.base_command import BaseCommand
-from type_utils import MYPY
-
-if MYPY:
-    from typing import Optional, Text
+from typing import Optional, Text
 
 
 class GitMakeChildBranch(BaseCommand):
-    def get_name(self):
-        # type: () -> Text
+    def get_name(self) -> Text:
         return "make-branch"
 
-    def get_short_description(self):
-        # type: () -> Text
+    def get_short_description(self) -> Text:
         return "creates a new branch at the current commit with the current branch as its parent"
 
-    def inflate_subcommand_parser(self, parser):
-        # type: (ArgumentParser) -> None
+    def inflate_subcommand_parser(self, parser: ArgumentParser) -> None:
         parser.add_argument("new_branch_name", help="the name of the new child branch to create")
         parser.add_argument(
             "--revision",
@@ -32,13 +26,11 @@ class GitMakeChildBranch(BaseCommand):
             ),
         )
 
-    def run_command(self, args):
-        # type: (Namespace) -> None
+    def run_command(self, args: Namespace) -> None:
         make_child_branch(args.new_branch_name, args.revision)
 
 
-def make_child_branch(new_branch_name, revision=None):
-    # type: (Text, Optional[Text]) -> None
+def make_child_branch(new_branch_name: Text, revision: Optional[Text] = None) -> None:
     parent = get_current_branch()
     if revision is None:
         # Use the current revision as the base

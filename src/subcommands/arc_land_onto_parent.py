@@ -6,23 +6,17 @@ from argparse import ArgumentParser, Namespace
 
 from git_helpers import arc, fail_if_not_rebased, get_branch_tracker, get_current_branch
 from subcommands.base_command import BaseCommand
-from type_utils import MYPY
-
-if MYPY:
-    from typing import Text
+from typing import Text
 
 
 class ArcLandOntoParent(BaseCommand):
-    def get_name(self):
-        # type: () -> Text
+    def get_name(self) -> Text:
         return "arc-land"
 
-    def get_short_description(self):
-        # type: () -> Text
+    def get_short_description(self) -> Text:
         return "`arc land` this branch onto its parent branch"
 
-    def inflate_subcommand_parser(self, parser):
-        # type: (ArgumentParser) -> None
+    def inflate_subcommand_parser(self, parser: ArgumentParser) -> None:
         parser.add_argument(
             "arc_land_args",
             nargs=argparse.REMAINDER,
@@ -32,8 +26,7 @@ class ArcLandOntoParent(BaseCommand):
             ),
         )
 
-    def run_command(self, args):
-        # type: (Namespace) -> None
+    def run_command(self, args: Namespace) -> None:
         extra_arc_land_options = args.arc_land_args
         if extra_arc_land_options:
             # If the first extra arg starts with "-", "--" must also have been passed, and

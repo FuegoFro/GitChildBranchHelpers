@@ -4,23 +4,17 @@ from argparse import ArgumentParser, Namespace
 
 from git_helpers import BranchTracker, get_branch_tracker, get_current_branch, git, hash_for
 from subcommands.base_command import BaseCommand
-from type_utils import MYPY
-
-if MYPY:
-    from typing import Text
+from typing import Text
 
 
 class GitRemoveLeafBranch(BaseCommand):
-    def get_name(self):
-        # type: () -> Text
+    def get_name(self) -> Text:
         return "remove-branch"
 
-    def get_short_description(self):
-        # type: () -> Text
+    def get_short_description(self) -> Text:
         return "deletes the current branch, if it is merged into its parent"
 
-    def inflate_subcommand_parser(self, parser):
-        # type: (ArgumentParser) -> None
+    def inflate_subcommand_parser(self, parser: ArgumentParser) -> None:
         parser.add_argument(
             "-f",
             "--force",
@@ -31,14 +25,12 @@ class GitRemoveLeafBranch(BaseCommand):
             "branch_name", nargs="?", help="the branch to remove; if not provided removes the current branch"
         )
 
-    def run_command(self, args):
-        # type: (Namespace) -> None
+    def run_command(self, args: Namespace) -> None:
         with get_branch_tracker() as tracker:
             remove_branch(tracker, branch_name=args.branch_name or get_current_branch(), force_remove=args.force)
 
 
-def remove_branch(tracker, branch_name, force_remove):
-    # type: (BranchTracker, Text, bool) -> None
+def remove_branch(tracker: BranchTracker, branch_name: Text, force_remove: bool) -> None:
     branch_commit = hash_for(branch_name)
     parent = tracker.parent_for_child(branch_name)
     children = tracker.children_for_parent(branch_name)

@@ -22,10 +22,7 @@ from subcommands.git_rename_branch import rename_current_branch
 from subcommands.print_branch_info import get_branch_info
 from subcommands.print_child_branch_structure import get_branch_structure_string, make_green, make_magenta
 from subcommands.set_branch_archived import set_archived
-from type_utils import MYPY
-
-if MYPY:
-    from typing import Callable, Iterator, Optional, Sequence, Text, Type
+from typing import Callable, Iterator, Optional, Sequence, Text, Type
 
 SRC_DIR = os.path.realpath(os.path.dirname(__file__))
 
@@ -34,8 +31,7 @@ def process_branch_structure(branch_structure: str) -> str:
 
 
 @contextlib.contextmanager
-def _run_test(path):
-    # type: (Text) -> Iterator[None]
+def _run_test(path: Text) -> Iterator[None]:
     path = os.path.expanduser(path)
     target_container = os.path.dirname(path)
     assert not os.path.exists(path)
@@ -51,8 +47,7 @@ def _run_test(path):
         shutil.rmtree(path)
 
 
-def _assert_fails(function):
-    # type: (Callable[[], None]) -> None
+def _assert_fails(function: Callable[[], None]) -> None:
     succeeded = False
     try:
         function()
@@ -62,8 +57,7 @@ def _assert_fails(function):
     assert not succeeded
 
 
-def _mypy_check():
-    # type: () -> None
+def _mypy_check() -> None:
     python_files = glob.glob(os.path.join(SRC_DIR, "*.py"))
     retcode = subprocess.call([sys.executable, "-m", "mypy", "--strict"] + python_files)
     if retcode != 0:
@@ -71,8 +65,7 @@ def _mypy_check():
         exit(1)
 
 
-def _initialize_repo():
-    # type: () -> None
+def _initialize_repo() -> None:
     """
         Initialize a repo and add a first commit so we can tell what branch we're on.
     """
@@ -85,8 +78,7 @@ def _initialize_repo():
     assert get_current_branch() == "main"
 
 
-def _command_with_args(command_class, command_args=()):
-    # type: (Type[BaseCommand], Sequence[Text]) -> None
+def _command_with_args(command_class: Type[BaseCommand], command_args: Sequence[Text] = ()) -> None:
     command = command_class()
     command_parser = argparse.ArgumentParser()
     command.inflate_subcommand_parser(command_parser)
@@ -96,8 +88,7 @@ def _command_with_args(command_class, command_args=()):
     command.run_command(parsed_args)
 
 
-def _integration_test(target_directory):
-    # type: (Text) -> None
+def _integration_test(target_directory: Text) -> None:
     with _run_test(target_directory):
         _initialize_repo()
         original_commit = hash_for("HEAD")
@@ -273,8 +264,7 @@ def _integration_test(target_directory):
             assert str(e) == "Branch does not have a parent: main"
 
 
-def _test_clean_branches(target_directory):
-    # type: (Text) -> None
+def _test_clean_branches(target_directory: Text) -> None:
     with _run_test(target_directory):
         _initialize_repo()
 
@@ -322,8 +312,7 @@ def _test_clean_branches(target_directory):
             assert tracker.is_branch_tracked("ghost_branch_with_children")
 
 
-def _test_delete_archived_branches(target_directory):
-    # type: (Text) -> None
+def _test_delete_archived_branches(target_directory: Text) -> None:
     with _run_test(target_directory):
         _initialize_repo()
 
@@ -358,8 +347,7 @@ def _test_delete_archived_branches(target_directory):
             assert not tracker.is_branch_tracked("second_branch_child_two")
 
 
-def run_tests(target_directory):
-    # type: (Optional[Text]) -> None
+def run_tests(target_directory: Optional[Text]) -> None:
     _mypy_check()
     if target_directory is None:
         target_directory = tempfile.mkdtemp()
@@ -372,8 +360,7 @@ def run_tests(target_directory):
     print("Tests finished successfully!")
 
 
-def main():
-    # type: () -> None
+def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--test_target_dir", default=None)
     args = parser.parse_args()

@@ -1,29 +1,23 @@
 from abc import abstractmethod
 from argparse import ArgumentParser, Namespace
 
-from type_utils import ABC, MYPY
-
-if MYPY:
-    from typing import Text
+from type_utils import ABC
+from typing import Text
 
 
 class BaseCommand(ABC):
     @abstractmethod
-    def get_name(self):
-        # type: () -> Text
+    def get_name(self) -> Text:
         pass
 
     @abstractmethod
-    def get_short_description(self):
-        # type: () -> Text
+    def get_short_description(self) -> Text:
         pass
 
     @abstractmethod
-    def inflate_subcommand_parser(self, parser):
-        # type: (ArgumentParser) -> None
+    def inflate_subcommand_parser(self, parser: ArgumentParser) -> None:
         pass
 
     @abstractmethod
-    def run_command(self, args):
-        # type: (Namespace) -> None
+    def run_command(self, args: Namespace) -> None:
         pass

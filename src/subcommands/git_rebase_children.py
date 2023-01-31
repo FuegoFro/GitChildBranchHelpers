@@ -13,23 +13,17 @@ from git_helpers import (
     run_command_expecting_failure,
 )
 from subcommands.base_command import BaseCommand
-from type_utils import MYPY
-
-if MYPY:
-    from typing import Sequence, Text, Optional
+from typing import Sequence, Text, Optional
 
 
 class GitRebaseOntoParent(BaseCommand):
-    def get_name(self):
-        # type: () -> Text
+    def get_name(self) -> Text:
         return "rebase"
 
-    def get_short_description(self):
-        # type: () -> Text
+    def get_short_description(self) -> Text:
         return "rebase the current branch onto its parent"
 
-    def inflate_subcommand_parser(self, parser):
-        # type: (ArgumentParser) -> None
+    def inflate_subcommand_parser(self, parser: ArgumentParser) -> None:
         parser.add_argument(
             "-r",
             "--recursive",
@@ -52,13 +46,11 @@ class GitRebaseOntoParent(BaseCommand):
             ),
         )
 
-    def run_command(self, args):
-        # type: (Namespace) -> None
+    def run_command(self, args: Namespace) -> None:
         rebase_children(args.recursive, args.branch, args.git_rebase_args)
 
 
-def do_rebase(tracker, parent, child, extra_args):
-    # type: (BranchTracker, Text, Text, Text) -> None
+def do_rebase(tracker: BranchTracker, parent: Text, child: Text, extra_args: Text) -> None:
     base = tracker.base_for_branch(child)
     parent_rev = hash_for(parent)
     if base == parent_rev:
@@ -71,8 +63,7 @@ def do_rebase(tracker, parent, child, extra_args):
     tracker.finish_rebase(child, parent_rev)
 
 
-def rebase_children(is_recursive, branch, extra_git_rebase_args=()):
-    # type: (bool, Optional[Text], Sequence[Text]) -> None
+def rebase_children(is_recursive: bool, branch: Optional[Text], extra_git_rebase_args: Sequence[Text] = ()) -> None:
     if branch is None:
         branch = get_current_branch()
     if extra_git_rebase_args:

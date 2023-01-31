@@ -7,34 +7,26 @@ from argparse import ArgumentParser, Namespace
 
 from git_helpers import BranchTracker, get_branch_tracker, get_current_branch
 from subcommands.base_command import BaseCommand
-from type_utils import MYPY
-
-if MYPY:
-    from typing import Iterable, List, Text, Tuple
+from typing import Iterable, List, Text, Tuple
 
 
 class PrintChildBranchStructure(BaseCommand):
-    def get_name(self):
-        # type: () -> Text
+    def get_name(self) -> Text:
         return "print-structure"
 
-    def get_short_description(self):
-        # type: () -> Text
+    def get_short_description(self) -> Text:
         return "prints the dependency structure of the branches"
 
-    def inflate_subcommand_parser(self, parser):
-        # type: (ArgumentParser) -> None
+    def inflate_subcommand_parser(self, parser: ArgumentParser) -> None:
         parser.add_argument(
             "-a", "--all", action="store_true", help="set to show all branches, including archived branches"
         )
 
-    def run_command(self, args):
-        # type: (Namespace) -> None
+    def run_command(self, args: Namespace) -> None:
         print(get_branch_structure_string(args.all))
 
 
-def output_supports_color():
-    # type: () -> bool
+def output_supports_color() -> bool:
     """
     Returns True if the running system's terminal supports color, and False
     otherwise. Taken from django.core.management.color.supports_color
@@ -46,8 +38,7 @@ def output_supports_color():
     return supported_platform and is_a_tty
 
 
-def make_green(message):
-    # type: (Text) -> Text
+def make_green(message: Text) -> Text:
     if output_supports_color():
         before = "\033[0;32m"
         after = "\033[0m"
@@ -56,8 +47,7 @@ def make_green(message):
     return before + message + after
 
 
-def make_magenta(message):
-    # type: (Text) -> Text
+def make_magenta(message: Text) -> Text:
     if output_supports_color():
         before = "\033[0;35m"
         after = "\033[0m"
@@ -66,10 +56,9 @@ def make_magenta(message):
     return before + message + after
 
 
-def get_branch_structure_string(show_all):
-    # type: (bool) -> Text
+def get_branch_structure_string(show_all: bool) -> Text:
     current_branch = get_current_branch()
-    structure_parts = []  # type: List[Text]
+    structure_parts: List[Text] = []
     with get_branch_tracker() as tracker:
         roots = []
         for parent in tracker.get_all_parents():
@@ -87,8 +76,7 @@ def get_branch_structure_string(show_all):
     return "\n".join(structure_parts)
 
 
-def _get_branch_structure_parts_internal(tracker, current_branch, roots, structure_parts, show_all):
-    # type: (BranchTracker, Text, List[Text], List[Text], bool) -> bool
+def _get_branch_structure_parts_internal(tracker: BranchTracker, current_branch: Text, roots: List[Text], structure_parts: List[Text], show_all: bool) -> bool:
     first = True
     skipped_archived = False
     for root in roots:
@@ -103,8 +91,7 @@ def _get_branch_structure_parts_internal(tracker, current_branch, roots, structu
     return skipped_archived
 
 
-def format_node(current_branch, node, is_archived):
-    # type: (Text, Text, bool) -> Text
+def format_node(current_branch: Text, node: Text, is_archived: bool) -> Text:
     if node == current_branch:
         node = make_green(node)
     if is_archived:
@@ -112,8 +99,7 @@ def format_node(current_branch, node, is_archived):
     return node
 
 
-def sorted_look_ahead(iterable):
-    # type: (Iterable[Text]) -> Iterable[Tuple[Text, bool]]
+def sorted_look_ahead(iterable: Iterable[Text]) -> Iterable[Tuple[Text, bool]]:
     it = iter(sorted(iterable))
 
     try:
@@ -127,8 +113,7 @@ def sorted_look_ahead(iterable):
     yield last, True
 
 
-def _add_tree_parts(tracker, current_branch, node, parts, indent_characters, show_all):
-    # type: (BranchTracker, Text, Text, List[Text], Text, bool) -> bool
+def _add_tree_parts(tracker: BranchTracker, current_branch: Text, node: Text, parts: List[Text], indent_characters: Text, show_all: bool) -> bool:
     # Then print the children
     skipped_archived = False
     children = []
