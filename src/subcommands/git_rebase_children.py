@@ -16,7 +16,7 @@ from subcommands.base_command import BaseCommand
 from type_utils import MYPY
 
 if MYPY:
-    from typing import Sequence, Text
+    from typing import Sequence, Text, Optional
 
 
 class GitRebaseOntoParent(BaseCommand):

@@ -9,6 +9,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import textwrap
 
 from git_helpers import get_branch_tracker, get_current_branch, git, hash_for
 from subcommands.base_command import BaseCommand
@@ -19,7 +20,7 @@ from subcommands.git_rebase_children import rebase_children
 from subcommands.git_remove_leaf_child import GitRemoveLeafBranch
 from subcommands.git_rename_branch import rename_current_branch
 from subcommands.print_branch_info import get_branch_info
-from subcommands.print_child_branch_structure import get_branch_structure_string, make_green
+from subcommands.print_child_branch_structure import get_branch_structure_string, make_green, make_magenta
 from subcommands.set_branch_archived import set_archived
 from type_utils import MYPY
 
@@ -28,26 +29,8 @@ if MYPY:
 
 SRC_DIR = os.path.realpath(os.path.dirname(__file__))
 
-UNARCHIVED_PRINT_STRUCTURE = """
-master
-│
-└── first_branch
-    │
-    ├── second_branch
-    │   │
-    │   └── third_branch
-    │
-    └── sibling_branch
-""".strip()
-
-ARCHIVED_PRINT_STRUCTURE = """
-master
-│
-└── first_branch
-    │
-    └── sibling_branch
-(not displaying archived branches, run with --all to see them)
-""".strip()
+def process_branch_structure(branch_structure: str) -> str:
+    return textwrap.dedent(branch_structure).strip('\n')
 
 
 @contextlib.contextmanager
@@ -99,7 +82,7 @@ def _initialize_repo():
     git("add .")
     git("commit -am initial_commit")
 
-    assert get_current_branch() == "master"
+    assert get_current_branch() == "main"
 
 
 def _command_with_args(command_class, command_args=()):
@@ -142,9 +125,9 @@ def _integration_test(target_directory):
         make_child_branch("sibling_branch")
         assert get_current_branch() == "sibling_branch"
 
-        # Make the first "real" commit, in master
+        # Make the first "real" commit, in main
         print("First commit")
-        git("checkout master")
+        git("checkout main")
         with open(os.path.join(target_directory, "hello.txt"), "wb") as f:
             f.write(b"Hello!")
         # Avoiding spaces because of how we break up args in the `git` function
@@ -153,9 +136,9 @@ def _integration_test(target_directory):
         assert original_commit != first_commit
 
         # Do the recursive rebase
-        print("Rebase first_branch and its children on top of master.")
+        print("Rebase first_branch and its children on top of main.")
         git("checkout first_branch")
-        rebase_children(True)
+        rebase_children(True, None)
         assert first_commit == hash_for("first_branch")
         assert first_commit == hash_for("second_branch")
         assert first_commit == hash_for("third_branch")
@@ -174,7 +157,7 @@ def _integration_test(target_directory):
         # sibling_branch.
         print("Doing second rebase")
         git("checkout second_branch")
-        rebase_children(True)
+        rebase_children(True, None)
         assert second_commit == hash_for("first_branch")
         assert second_commit == hash_for("second_branch")
         assert second_commit == hash_for("third_branch")
@@ -206,42 +189,76 @@ def _integration_test(target_directory):
 
         # This should throw since the rebase has conflicts
         print("Testing merge conflicts")
-        _assert_fails(lambda: rebase_children(True))
+        _assert_fails(lambda: rebase_children(True, None))
 
         # Abort the rebase and try again
         git("rebase --abort")
         # It should fail for the same reason
         print("Testing merge conflicts again")
-        _assert_fails(lambda: rebase_children(True))
+        _assert_fails(lambda: rebase_children(True, None))
 
         print("Resolving the merge conflict")
         with open(os.path.join(target_directory, "hello.txt"), "wb") as f:
             f.write(b"Hello merge")
         git("add hello.txt")
-        git("rebase --continue")
+        git("-c core.editor=true rebase --continue")
 
         # This should effectively no-op
         print("Doing no-op rebase")
         current_commit = hash_for("HEAD")
-        rebase_children(True)
+        rebase_children(True, None)
         assert current_commit == hash_for("HEAD")
 
-        unarchived_print_structure_sibling_branch = UNARCHIVED_PRINT_STRUCTURE.replace(
-            "sibling_branch", make_green("sibling_branch")
+        x = process_branch_structure(f"""
+            main
+            │
+            └── first_branch
+                │
+                ├── second_branch
+                │   │
+                │   └── third_branch
+                │
+                └── {make_green("sibling_branch")}
+            """
         )
-        archived_print_structure_sibling_branch = ARCHIVED_PRINT_STRUCTURE.replace(
-            "sibling_branch", make_green("sibling_branch")
-        )
-        assert get_branch_structure_string(False) == unarchived_print_structure_sibling_branch
+        assert get_branch_structure_string(False) == x
 
         set_archived(True, "second_branch")
-        assert get_branch_structure_string(False) == archived_print_structure_sibling_branch
-        assert get_branch_structure_string(True) == unarchived_print_structure_sibling_branch
+        assert get_branch_structure_string(False) == process_branch_structure(f"""
+            main
+            │
+            └── first_branch
+                │
+                └── {make_green("sibling_branch")}
+            (not displaying archived branches, run with --all to see them)
+            """
+        )
+        assert get_branch_structure_string(True) == process_branch_structure(f"""
+            main
+            │
+            └── first_branch
+                │
+                ├── second_branch {make_magenta("(archived)")}
+                │   │
+                │   └── third_branch
+                │
+                └── {make_green("sibling_branch")}
+            """
+        )
 
         git("checkout second_branch")
         set_archived(False)
-        assert get_branch_structure_string(False) == UNARCHIVED_PRINT_STRUCTURE.replace(
-            "second_branch", make_green("second_branch")
+        assert get_branch_structure_string(False) == process_branch_structure(f"""
+            main
+            │
+            └── first_branch
+                │
+                ├── {make_green("second_branch")}
+                │   │
+                │   └── third_branch
+                │
+                └── sibling_branch
+            """
         )
 
         current_commit = hash_for("HEAD")
@@ -250,10 +267,10 @@ def _integration_test(target_directory):
         ) == "Parent branch: first_branch; Base revision: {}".format(current_commit)
         assert get_branch_info(branch=None, use_null_delimiter=True) == "first_branch\0{}".format(current_commit)
         try:
-            get_branch_info(branch="master", use_null_delimiter=False)
+            get_branch_info(branch="main", use_null_delimiter=False)
             assert False, "Should not get here"
         except SystemExit as e:
-            assert str(e) == "Branch does not have a parent: master"
+            assert str(e) == "Branch does not have a parent: main"
 
 
 def _test_clean_branches(target_directory):
@@ -265,12 +282,12 @@ def _test_clean_branches(target_directory):
         make_child_branch("valid_branch")
         assert get_current_branch() == "valid_branch"
 
-        git("checkout master")
+        git("checkout main")
 
         make_child_branch("ghost_branch_childless")
         assert get_current_branch() == "ghost_branch_childless"
 
-        git("checkout master")
+        git("checkout main")
 
         make_child_branch("ghost_branch_with_children")
         assert get_current_branch() == "ghost_branch_with_children"
@@ -278,7 +295,7 @@ def _test_clean_branches(target_directory):
         make_child_branch("child_of_ghost_branch")
         assert get_current_branch() == "child_of_ghost_branch"
 
-        git("checkout master")
+        git("checkout main")
 
         print("Deleting branches from git")
         git("branch -D ghost_branch_childless")
@@ -314,7 +331,7 @@ def _test_delete_archived_branches(target_directory):
         make_child_branch("first_branch")
         assert get_current_branch() == "first_branch"
 
-        git("checkout master")
+        git("checkout main")
 
         make_child_branch("second_branch")
         assert get_current_branch() == "second_branch"
@@ -325,7 +342,7 @@ def _test_delete_archived_branches(target_directory):
         make_child_branch("second_branch_child_two")
         assert get_current_branch() == "second_branch_child_two"
 
-        git("checkout master")
+        git("checkout main")
 
         with get_branch_tracker() as tracker:
             tracker.set_is_archived("first_branch", True)

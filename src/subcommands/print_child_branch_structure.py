@@ -10,9 +10,7 @@ from subcommands.base_command import BaseCommand
 from type_utils import MYPY
 
 if MYPY:
-    from typing import Iterable, List, Text, Tuple, TypeVar
-
-    T = TypeVar("T")
+    from typing import Iterable, List, Text, Tuple
 
 
 class PrintChildBranchStructure(BaseCommand):
@@ -115,7 +113,7 @@ def format_node(current_branch, node, is_archived):
 
 
 def sorted_look_ahead(iterable):
-    # type: (Iterable[T]) -> Iterable[Tuple[T, bool]]
+    # type: (Iterable[Text]) -> Iterable[Tuple[Text, bool]]
     it = iter(sorted(iterable))
 
     try:
