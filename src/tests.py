@@ -7,6 +7,7 @@ import glob
 import os
 import shutil
 import subprocess
+import sys
 import tempfile
 
 from git_helpers import get_branch_tracker, get_current_branch, git, hash_for
@@ -80,16 +81,11 @@ def _assert_fails(function):
 
 def _mypy_check():
     # type: () -> None
-    for is_python_2 in (True, False):
-        mypy_options = ["--strict"]
-        if is_python_2:
-            mypy_options.append("--py2")
-
-        python_files = glob.glob(os.path.join(SRC_DIR, "*.py"))
-        retcode = subprocess.call(["python3", "-m", "mypy"] + mypy_options + python_files)
-        if retcode != 0:
-            print("\nMypy failed for Python {}!!!\n".format("2" if is_python_2 else "3"))
-            exit(1)
+    python_files = glob.glob(os.path.join(SRC_DIR, "*.py"))
+    retcode = subprocess.call([sys.executable, "-m", "mypy", "--strict"] + python_files)
+    if retcode != 0:
+        print("\nMypy failed!!!\n")
+        exit(1)
 
 
 def _initialize_repo():
