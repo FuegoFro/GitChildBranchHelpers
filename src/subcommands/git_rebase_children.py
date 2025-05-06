@@ -34,6 +34,12 @@ class GitRebaseOntoParent(BaseCommand):
             help=("the branch to rebase; if not provided removes the current branch"),
         )
         parser.add_argument(
+            "-f",
+            "--force",
+            action="store_true",
+            help="if set, will do the rebase even if the current branch is already up to date with its parent",
+        )
+        parser.add_argument(
             "git_rebase_args",
             nargs=argparse.REMAINDER,
             help=(
@@ -43,13 +49,13 @@ class GitRebaseOntoParent(BaseCommand):
         )
 
     def run_command(self, args: Namespace) -> None:
-        rebase_children(args.recursive, args.branch, args.git_rebase_args)
+        rebase_children(args.recursive, args.branch, args.git_rebase_args, args.force)
 
 
-def do_rebase(tracker: BranchTracker, parent: str, child: str, extra_args: str) -> None:
+def do_rebase(tracker: BranchTracker, parent: str, child: str, extra_args: str, force: bool) -> None:
     base = tracker.base_for_branch(child)
     parent_rev = hash_for(parent)
-    if base == parent_rev:
+    if base == parent_rev and not force:
         return
 
     tracker.start_rebase(child, parent_rev)
@@ -59,7 +65,7 @@ def do_rebase(tracker: BranchTracker, parent: str, child: str, extra_args: str) 
     tracker.finish_rebase(child, parent_rev)
 
 
-def rebase_children(is_recursive: bool, branch: Optional[str], extra_git_rebase_args: Sequence[str] = ()) -> None:
+def rebase_children(is_recursive: bool, branch: Optional[str], extra_git_rebase_args: Sequence[str] = (), force: bool = False) -> None:
     if branch is None:
         branch = get_current_branch()
     if extra_git_rebase_args:
@@ -71,8 +77,11 @@ def rebase_children(is_recursive: bool, branch: Optional[str], extra_git_rebase_
     else:
         extra_args = ""
 
+    if force:
+        extra_args += " --force-rebase"
+
     with get_branch_tracker() as tracker:
-        do_rebase(tracker, tracker.parent_for_child(branch), branch, extra_args)
+        do_rebase(tracker, tracker.parent_for_child(branch), branch, extra_args, force)
 
         if is_recursive:
             to_rebase_onto = [branch]
@@ -80,7 +89,7 @@ def rebase_children(is_recursive: bool, branch: Optional[str], extra_git_rebase_
                 parent = to_rebase_onto.pop()
                 children = tracker.children_for_parent(parent)
                 for child in children:
-                    do_rebase(tracker, parent, child, extra_args)
+                    do_rebase(tracker, parent, child, extra_args, force)
                     to_rebase_onto.append(child)
 
         # Go back to where we started.
