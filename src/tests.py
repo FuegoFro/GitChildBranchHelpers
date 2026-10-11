@@ -349,6 +349,34 @@ def _test_delete_archived_branches(target_directory: str) -> None:
             assert not tracker.is_branch_tracked("second_branch_child_two")
 
 
+def _test_worktree_shares_tracker(target_directory: str) -> None:
+    with _run_test(target_directory):
+        _initialize_repo()
+
+        make_child_branch("first_branch")
+        assert get_current_branch() == "first_branch"
+        git("checkout main")
+
+        # A linked worktree's .git file points at a private
+        # .git/worktrees/<name> directory, so get_branch_tracker has to
+        # resolve back to the main repo's .git dir (via --git-common-dir,
+        # not --git-dir) to find the shared branches.csv.
+        worktree_path = os.path.join(target_directory, "worktree")
+        git(f"worktree add {worktree_path} -b worktree_branch")
+
+        starting_directory = os.getcwd()
+        try:
+            os.chdir(worktree_path)
+            with get_branch_tracker() as tracker:
+                assert tracker.is_branch_tracked("first_branch")
+                tracker.set_is_archived("first_branch", True)
+        finally:
+            os.chdir(starting_directory)
+
+        with get_branch_tracker() as tracker:
+            assert tracker.is_archived("first_branch")
+
+
 def run_tests(target_directory: Optional[str]) -> None:
     _mypy_check()
     if target_directory is None:
@@ -358,6 +386,7 @@ def run_tests(target_directory: Optional[str]) -> None:
     _integration_test(target_directory)
     _test_clean_branches(target_directory)
     _test_delete_archived_branches(target_directory)
+    _test_worktree_shares_tracker(target_directory)
     print("")
     print("Tests finished successfully!")
 
