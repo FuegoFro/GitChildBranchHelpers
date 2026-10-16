@@ -19,7 +19,7 @@ def get_current_branch() -> str:
 
 
 def get_branch_tracker() -> "BranchTrackerWrapper":
-    git_dir = git("rev-parse --git-dir").strip()
+    git_dir = git("rev-parse --git-common-dir").strip()
     config_dir = os.path.join(git_dir, "child_branch_helper")
     if os.path.exists(config_dir):
         assert os.path.isdir(config_dir)
